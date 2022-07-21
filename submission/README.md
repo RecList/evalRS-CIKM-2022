@@ -1,4 +1,4 @@
-                                          # EvalRS-CIKM-2022 : Evaluation
+# EvalRS-CIKM-2022 : Evaluation
 
 `EvalRSRunner` (defined in`submission.py`) is an abstract class which encapsulates the evaluation approach for EvalRS (
 Bootstrapped Nested Cross-Validation). 
