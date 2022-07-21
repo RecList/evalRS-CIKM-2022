@@ -41,10 +41,10 @@ class EvalRSRunner(ABC):
         self._num_folds = num_folds
         self._folds = self._generate_folds(num_folds, self._random_state)
 
-    def _generate_folds(self, num_folds: int, seed: int) -> (List[pd.DataFrame], int):
+    def _generate_folds(self, num_folds: int, seed: int) -> List[pd.DataFrame]:
         df_rand = self._df_events.sample(frac=1.0, replace=False, random_state=seed)
         folds = np.array_split(df_rand, num_folds)
-        # mem management
+        # some mem management
         del self._df_events
         return folds
 
@@ -72,12 +72,11 @@ class EvalRSRunner(ABC):
         test_set_df['user_id'] = test_set_index
         return test_set_df.set_index('user_id')
 
-    def _test_model(self, model, fold: int, limit:int = None):
+    def _test_model(self, model, fold: int, limit: int = None):
 
         y_test = self._get_test_set(fold=fold, limit=limit)
         # for fast testing
-        y_pred = model.predict(y_test.index.to_numpy(),
-                          k=100)
+        y_pred = model.predict(y_test.index.to_numpy(), k=100)
         hits = np.stack([(y_test.values == y_pred[col].values.reshape(-1, 1)) for col in y_pred.columns])
         hits = (hits.sum(axis=0) > 0)
         hit_rate = hits.sum() / (y_test != -1).values.sum()
@@ -86,7 +85,7 @@ class EvalRSRunner(ABC):
             'HIT_RATE': hit_rate
         }
 
-    def evaluate(self, upload:bool, debug=True, limit:int = None):
+    def evaluate(self, upload: bool, debug=True, limit: int = None):
         if upload:
             assert self.email
             assert self.participant_id
@@ -99,33 +98,34 @@ class EvalRSRunner(ABC):
         for fold in range(num_folds):
             train_df = self._get_train_set(fold=fold)
             if debug:
-                print('\nPerforming Training for fold {}/{}'.format(fold+1, num_folds))
+                print('\nPerforming Training for fold {}/{}...'.format(fold+1, num_folds))
             model = self.train_model(train_df)
-            # TODO: call RecList here instead
             if debug:
-                print('Performing Evaluation for fold {}/{}'.format(fold+1, num_folds))
+                print('Performing Evaluation for fold {}/{}...'.format(fold+1, num_folds))
+            # TODO: call RecList here instead
             results = self._test_model(model, fold, limit=limit)
             # append RecList result path into fold_results
             fold_results.append(results)
 
         local_file = '{}_{}.json'.format(self.email.replace('@', '_'), int(time.time()*10000))
-        with open(local_file,'w') as outfile:
+        with open(local_file, 'w') as outfile:
             json.dump(fold_results, outfile, indent=2)
 
         if upload:
             # TODO: iterate and read from RecList artifacts, and aggregate across folds
             upload_submission(local_file,
-                              aws_access_key_id = self.aws_access_key_id,
-                              aws_secret_access_key = self.aws_secret_access_key,
-                              participant_id = self.participant_id,
-                              bucket_name = self.bucket_name)
+                              aws_access_key_id=self.aws_access_key_id,
+                              aws_secret_access_key=self.aws_secret_access_key,
+                              participant_id=self.participant_id,
+                              bucket_name=self.bucket_name)
 
-    # @abstractmethod
+    @abstractmethod
     def train_model(self, train_df: pd.DataFrame):
         raise NotImplementedError
 
 
 if __name__ == '__main__':
+
     runner = EvalRSRunner(path_to_dataset='./lfm_1b_dataset')
     df = runner._get_train_set(fold=0)
     print(df.head(10))
