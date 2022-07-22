@@ -6,6 +6,8 @@ import numpy as np
 from typing import List
 import json
 from submission.uploader import upload_submission
+from submission.EvalRSRecList import EvalRSRecList, EvalRSDataset
+from collections import defaultdict
 
 
 class EvalRSRunner(ABC):
@@ -70,20 +72,24 @@ class EvalRSRunner(ABC):
         test_set_df = pd.DataFrame(test_set).fillna(value=-1).astype(np.int64)
         # set index to original index
         test_set_df['user_id'] = test_set_index
+        test_set_df.columns = [str(_) for _ in test_set_df.columns]
         return test_set_df.set_index('user_id')
 
-    def _test_model(self, model, fold: int, limit: int = None):
+    def _test_model(self, model, fold: int, limit: int = None) -> str:
 
-        y_test = self._get_test_set(fold=fold, limit=limit)
-        # for fast testing
-        y_pred = model.predict(y_test.index.to_numpy(), k=100)
-        hits = np.stack([(y_test.values == y_pred[col].values.reshape(-1, 1)) for col in y_pred.columns])
-        hits = (hits.sum(axis=0) > 0)
-        hit_rate = hits.sum() / (y_test != -1).values.sum()
-        return {
-            'FOLD': fold,
-            'HIT_RATE': hit_rate
-        }
+        test_set_df = self._get_test_set(fold=fold, limit=limit)
+        x_test = test_set_df.reset_index()[['user_id']]
+        y_test = test_set_df
+
+        dataset = EvalRSDataset()
+        dataset.load(x_test=x_test,
+                     y_test=y_test,
+                     users=self.df_users,
+                     items=self.df_tracks)
+
+        rlist = EvalRSRecList(model=model, dataset=dataset)
+        report_path = rlist()
+        return report_path
 
     def evaluate(self, upload: bool, debug=True, limit: int = None):
         if upload:
@@ -94,7 +100,7 @@ class EvalRSRunner(ABC):
             assert self.bucket_name
 
         num_folds = len(self._folds)
-        fold_results = []
+        fold_results_path = []
         for fold in range(num_folds):
             train_df = self._get_train_set(fold=fold)
             if debug:
@@ -102,17 +108,38 @@ class EvalRSRunner(ABC):
             model = self.train_model(train_df)
             if debug:
                 print('Performing Evaluation for fold {}/{}...'.format(fold+1, num_folds))
-            # TODO: call RecList here instead
-            results = self._test_model(model, fold, limit=limit)
-            # append RecList result path into fold_results
-            fold_results.append(results)
+            results_path = self._test_model(model, fold, limit=limit)
 
+            fold_results_path.append(results_path)
+
+        raw_results = []
+        fold_results = defaultdict(list)
+        for fold, results_path in enumerate(fold_results_path):
+            with open(os.path.join(results_path, 'results', 'report.json')) as f:
+                result = json.load(f)
+            # save reclist output
+            raw_results.append(result)
+            # tests which we care about
+            tests = ['HIT_RATE']
+            # extract test results
+            for test_data in result['data']:
+                if test_data['test_name'] in tests:
+                    fold_results[test_data['test_name']].append(test_data['test_result'])
+
+        # compute means
+        # TODO: CI computation
+        agg_results = {test: np.mean(res) for test, res in fold_results.items()}
+        # build final output dict
+        out_dict = {
+            'reclist_reports': raw_results,
+            'results': agg_results
+        }
+        # TODO: dump data somewhere better?
         local_file = '{}_{}.json'.format(self.email.replace('@', '_'), int(time.time()*10000))
         with open(local_file, 'w') as outfile:
-            json.dump(fold_results, outfile, indent=2)
-
+            json.dump(out_dict, outfile, indent=2)
+        print('SUBMISSION RESULTS SAVE TO {}'.format(local_file))
         if upload:
-            # TODO: iterate and read from RecList artifacts, and aggregate across folds
             upload_submission(local_file,
                               aws_access_key_id=self.aws_access_key_id,
                               aws_secret_access_key=self.aws_secret_access_key,
@@ -122,10 +149,3 @@ class EvalRSRunner(ABC):
     @abstractmethod
     def train_model(self, train_df: pd.DataFrame):
         raise NotImplementedError
-
-
-if __name__ == '__main__':
-
-    runner = EvalRSRunner(path_to_dataset='./lfm_1b_dataset')
-    df = runner._get_train_set(fold=0)
-    print(df.head(10))
