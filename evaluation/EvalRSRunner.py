@@ -8,24 +8,34 @@ import json
 from evaluation.uploader import upload_submission
 from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
 from collections import defaultdict
-
+from evaluation.utils import download_with_progress, get_cache_directory, LFM_DATASET_PATH, decompress_zipfile
 
 class EvalRSRunner(ABC):
 
     def __init__(self,
-                 path_to_dataset: str,
+                 path_to_dataset: str = None,
                  seed: int = None,
-                 num_folds: int = 5,
+                 num_folds: int = 4,
                  email: str = None,
                  participant_id: str = None,
                  aws_access_key_id: str = None,
                  aws_secret_access_key: str = None,
-                 bucket_name: str = None):
+                 bucket_name: str = None,
+                 force_download: bool = False):
+        if path_to_dataset:
+            # dataset path provided
+            self.path_to_dataset = path_to_dataset
+        else:
+            # download dataset
+            self.path_to_dataset = os.path.join(get_cache_directory(), 'lfm_1b_dataset')
+            if not os.path.exists(self.path_to_dataset) or force_download:
+                    download_with_progress(LFM_DATASET_PATH, os.path.join(get_cache_directory(), 'lfm_1b_dataset.zip'))
+                    decompress_zipfile(os.path.join(get_cache_directory(), 'lfm_1b_dataset.zip'),
+                                       get_cache_directory())
 
-        self.path_to_dataset = path_to_dataset
-        self.path_to_events = os.path.join(path_to_dataset, 'LFM-1b_events.pk')
-        self.path_to_tracks = os.path.join(path_to_dataset, 'LFM-1b_tracks.pk')
-        self.path_to_users = os.path.join(path_to_dataset, 'LFM-1b_users.pk')
+        self.path_to_events = os.path.join(self.path_to_dataset, 'LFM-1b_events.pk')
+        self.path_to_tracks = os.path.join(self.path_to_dataset, 'LFM-1b_tracks.pk')
+        self.path_to_users = os.path.join(self.path_to_dataset, 'LFM-1b_users.pk')
         self.email = email
         self.participant_id = participant_id
         self.aws_access_key_id = aws_access_key_id
