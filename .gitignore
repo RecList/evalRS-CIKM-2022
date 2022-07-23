@@ -130,3 +130,5 @@ dmypy.json
 
 **.pk
 upload.env
+
+*.json
