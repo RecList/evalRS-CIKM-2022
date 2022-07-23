@@ -1,3 +1,17 @@
+"""
+
+    This script contains the list of tests that has been prepared for the challenge. Tests are standard
+    IR metrics, interesting datasets slices based on data analysis and literatue, and novel behavioral tests.
+
+    While you should not modify this class, your submission should inherit from EvalRSRecList and implement
+    additional custom tests that you found useful to debug the behavior of your model, or uncover some insights
+    in the dataset, or again, check for regression errors in test case you care about.
+
+    You're free to experiment with the dataset, and share your insightful work as operationalized in RecTests with
+    the community!
+
+"""
+
 from reclist.abstractions import RecList, RecDataset, rec_test
 
 

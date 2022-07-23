@@ -1,3 +1,13 @@
+"""
+
+    This is the abstract class containing the common methods for the evaluation of your model.
+    Your own submission will implement an instance of EvalRSRunner, containing your trainining logic,
+    and the reference to your model object (i.e. a Python class exposing a `predict_all` method).
+
+    You should NOT modify this script.
+
+"""
+
 import os
 from abc import ABC, abstractmethod
 import pandas as pd
@@ -5,15 +15,14 @@ import time
 import numpy as np
 from typing import List
 import json
-from evaluation.uploader import upload_submission
 from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
 from collections import defaultdict
-from evaluation.utils import download_with_progress, get_cache_directory, LFM_DATASET_PATH, decompress_zipfile
+from evaluation.utils import download_with_progress, get_cache_directory, LFM_DATASET_PATH, decompress_zipfile, upload_submission
+
 
 class EvalRSRunner(ABC):
 
     def __init__(self,
-                 path_to_dataset: str = None,
                  seed: int = None,
                  num_folds: int = 4,
                  email: str = None,
@@ -22,16 +31,15 @@ class EvalRSRunner(ABC):
                  aws_secret_access_key: str = None,
                  bucket_name: str = None,
                  force_download: bool = False):
-        if path_to_dataset:
-            # dataset path provided
-            self.path_to_dataset = path_to_dataset
+        # download dataset
+        self.path_to_dataset = os.path.join(get_cache_directory(), 'lfm_1b_dataset')
+        if not os.path.exists(self.path_to_dataset) or force_download:
+            print("Downloading LFM dataset...")
+            download_with_progress(LFM_DATASET_PATH, os.path.join(get_cache_directory(), 'lfm_1b_dataset.zip'))
+            decompress_zipfile(os.path.join(get_cache_directory(), 'lfm_1b_dataset.zip'),
+                                    get_cache_directory())
         else:
-            # download dataset
-            self.path_to_dataset = os.path.join(get_cache_directory(), 'lfm_1b_dataset')
-            if not os.path.exists(self.path_to_dataset) or force_download:
-                    download_with_progress(LFM_DATASET_PATH, os.path.join(get_cache_directory(), 'lfm_1b_dataset.zip'))
-                    decompress_zipfile(os.path.join(get_cache_directory(), 'lfm_1b_dataset.zip'),
-                                       get_cache_directory())
+            print("LFM dataset already downloaded. Skipping download.")
 
         self.path_to_events = os.path.join(self.path_to_dataset, 'LFM-1b_events.pk')
         self.path_to_tracks = os.path.join(self.path_to_dataset, 'LFM-1b_tracks.pk')

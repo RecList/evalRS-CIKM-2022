@@ -10,6 +10,15 @@ class RandomModel(RecModel):
         self.items = items
 
     def predict(self, user_ids: Union[List, np.ndarray], k=10) -> pd.DataFrame:
+        """
+        
+        This function takes as input all the users that we want to predict the top-k items for, and 
+        returns all the predicted songs.
+
+        While in this example is just a random generator, the same logic in your implementation 
+        would allow for batch predictions of all the target data points.
+        
+        """
         if isinstance(user_ids, list):
             user_ids = np.array(user_ids)
         num_users = len(user_ids)
