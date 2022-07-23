@@ -19,13 +19,13 @@ _We are working hard on this: check back often for updates._
 * 📚 [EvalRS paper](https://arxiv.org/abs/2207.05772)
 * 📖 [RecList website](https://reclist.io/)
 
-## How To Join
+## How To Join The Race
 
-## First Step
+### First Step: Register
 
 * Register [Online](https://reclist.io/cikm2022-cup/leaderboard.html)
 
-### Run the example submission first
+### Second Step: Run The Example
 
 A sample submission script is included in this repository as a template. We suggest you run it _as soon as you have received your credentials_ to check that your setup is correct. To do so:
 
@@ -58,16 +58,16 @@ Click [here](https://reclist.io/cikm2022-cup/leaderboard.html) to see the leader
 
 P.s.: if something in the procedure goes wrong, please contact us through Slack!
 
-### Run your code
+### Third Step: Run your code
 
 A valid submission script can be obtained by copying into your repository `submission.py`, and modify `my_runner.py` and the related model to use your logic instead of the default one. In theory, no change should be necessary to `submission.py`. Your submission is required to build an instance of the class `EvalRSRunner`, providing an implementation for the `train_model.py` method.
 
 In the `evaluation` folder, we included a lenghtier explanation of the evaluation code involved in this challenge: please refer to that file and the provided examples for in-depth explanation, or reach out on Slack if you're unsure on how to use it.
 
-### How easy it is to run the challenge?
+## How easy it is to join?
 
-Very easy! If you already have a recommendation model, you just need to wrap this in a way that
-is consistent with our own API.
+Very easy! If you already have a recommendation model you just need to wrap this in a way that
+is consistent with our own API. 
 
 
 ```python
@@ -86,7 +86,6 @@ class RandomModel:
         return pd.DataFrame(pred, columns=['user_id', *[ str(i) for i in range(k)]]).set_index('user_id')
 
 ```
-
 
 ## Organizers
 
