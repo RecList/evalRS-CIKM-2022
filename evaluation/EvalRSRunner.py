@@ -5,8 +5,8 @@ import time
 import numpy as np
 from typing import List
 import json
-from submission.uploader import upload_submission
-from submission.EvalRSRecList import EvalRSRecList, EvalRSDataset
+from evaluation.uploader import upload_submission
+from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
 from collections import defaultdict
 
 
