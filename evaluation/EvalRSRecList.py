@@ -1,7 +1,7 @@
 """
 
     This script contains the list of tests that has been prepared for the challenge. Tests are standard
-    IR metrics, interesting datasets slices based on data analysis and literatue, and novel behavioral tests.
+    IR metrics, interesting datasets slices based on data analysis and literature, and novel behavioral tests.
 
     While you should not modify this class, your submission should inherit from EvalRSRecList and implement
     additional custom tests that you found useful to debug the behavior of your model, or uncover some insights

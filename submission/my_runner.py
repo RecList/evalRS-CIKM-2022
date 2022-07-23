@@ -1,6 +1,6 @@
 """
 
-Example of a custom implementatin for the EvalRSRunner class. In this case, we 
+Example of a custom implementation for the EvalRSRunner class. In this case, we
 override the training method to implement a simple random model.
 
 """
