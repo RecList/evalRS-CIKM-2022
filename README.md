@@ -23,7 +23,7 @@ _We are working hard on this: check back often for updates._
 
 ### First Step: Register
 
-* Register [Online](https://reclist.io/cikm2022-cup/leaderboard.html)
+* Register [Online](https://reclist.io/cikm2022-cup/leaderboard.html). You should get some tokens, save them for later!
 
 ### Second Step: Run The Example
 
