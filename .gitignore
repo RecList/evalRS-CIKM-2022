@@ -132,3 +132,5 @@ dmypy.json
 upload.env
 
 *.json
+
+.DS_Store
