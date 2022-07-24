@@ -17,6 +17,8 @@ load_dotenv('upload.env', verbose=True)
 
 
 EMAIL = os.getenv('EMAIL')  # the e-mail you used to sign up
+# if you're testing this code locally, you can use a dummy e-mail address
+# and set UPLOAD to 0 in the env file, and the code will not upload the results
 assert EMAIL != '' and EMAIL is not None
 BUCKET_NAME = os.getenv('BUCKET_NAME')  # you received it in your e-mail
 PARTICIPANT_ID = os.getenv('PARTICIPANT_ID')  # you received it in your e-mail
@@ -28,7 +30,6 @@ LIMIT = int(os.getenv('LIMIT'))  # limit the number of test cases, for quick tes
 print("Submission will be uploaded: {}".format(UPLOAD))
 if LIMIT > 0:
     print("WARNING: only {} test cases will be used".format(LIMIT))
-
 
 # run the evaluation loop when the script is called directly
 if __name__ == '__main__':
