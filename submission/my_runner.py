@@ -6,7 +6,7 @@ override the training method to implement a simple random model.
 """
 
 from evaluation.EvalRSRunner import EvalRSRunner
-from models.RandomModel import RandomModel
+from submission.RandomModel import RandomModel
 import pandas as pd
 
 

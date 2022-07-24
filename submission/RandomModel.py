@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from reclist.abstractions import RecModel
-from typing import List, Union
 
 
 class RandomModel(RecModel):

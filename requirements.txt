@@ -4,4 +4,5 @@ numpy==1.21.6
 python-dotenv==0.20.0
 boto3==1.24.34
 scipy==1.7.3
+notebook==6.4.12
 git+https://github.com/jacopotagliabue/reclist@develop

@@ -94,7 +94,7 @@ P.s.: if something in the procedure goes wrong, please contact us through Slack!
 
 ### Third Step: Run your code
 
-A valid submission script can be obtained by copying into your repository `submission.py`, and modify `my_runner.py` and the related model to use your logic instead of the default one. In theory, no change should be necessary to `submission.py`. Your submission is required to build an instance of the class `EvalRSRunner`, providing an implementation for the `train_model.py` method.
+A valid submission script can be obtained by copying into your repository `submission.py`, and modify `my_runner.py` and the related model (`RandomModel.py`) to use your logic instead of the default one. In theory, no change should be necessary to `submission.py`. Your submission is required to build an instance of the class `EvalRSRunner`, providing an implementation for the `train_model.py` method.
 
 In the `evaluation` folder, we included a lenghtier explanation of the evaluation methodology involved in this challenge; in the `notebooks` folder, we include a step-by-step, heavily commented guide on how to build a submission, including sample data points and an example of using a derived RecList for evaluation; in the `baselines` folder, you will find more complex models than the simple random one, as an inspiration. Remember: this competition is about models as much as about _data_ and _testing_ - take our initial work just as an inspiration!
 
