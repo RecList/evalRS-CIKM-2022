@@ -15,6 +15,7 @@ import time
 import numpy as np
 from typing import List
 import json
+from reclist.abstractions import RecList
 from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
 from collections import defaultdict
 from evaluation.utils import download_with_progress, get_cache_directory, LFM_DATASET_PATH, decompress_zipfile, upload_submission
@@ -55,8 +56,8 @@ class EvalRSRunner(ABC):
         assert os.path.exists(self.path_to_users)
 
         self._df_events = pd.read_parquet(self.path_to_events)
-        self.df_tracks = pd.read_parquet(self.path_to_events)
-        self.df_users = pd.read_parquet(self.path_to_events)
+        self.df_tracks = pd.read_parquet(self.path_to_tracks)
+        self.df_users = pd.read_parquet(self.path_to_users)
         self._random_state = int(time.time()) if not seed else seed
         self._num_folds = num_folds
         self._folds = self._generate_folds(num_folds, self._random_state)
@@ -93,7 +94,9 @@ class EvalRSRunner(ABC):
         test_set_df.columns = [str(_) for _ in test_set_df.columns]
         return test_set_df.set_index('user_id')
 
-    def _test_model(self, model, fold: int, limit: int = None) -> str:
+    def _test_model(self, model, fold: int, limit: int = None, custom_RecList: RecList = None) -> str:
+        # use default RecList if not specified
+        myRecList = custom_RecList if custom_RecList else EvalRSRecList
 
         test_set_df = self._get_test_set(fold=fold, limit=limit)
         x_test = test_set_df.reset_index()[['user_id']]
@@ -105,11 +108,14 @@ class EvalRSRunner(ABC):
                      users=self.df_users,
                      items=self.df_tracks)
 
-        rlist = EvalRSRecList(model=model, dataset=dataset)
+        rlist = myRecList(model=model, dataset=dataset)
         report_path = rlist()
         return report_path
 
-    def evaluate(self, upload: bool, debug=True, limit: int = None):
+    def evaluate(self, upload: bool, limit: int = None,  custom_RecList: RecList = None, debug=True):
+        if limit:
+            print("WARNING : LIMITING TEST EVENTS TO {} EVENTS ONLY - upload disable".format(limit))
+            upload = False
         if upload:
             assert self.email
             assert self.participant_id
@@ -126,7 +132,7 @@ class EvalRSRunner(ABC):
             model = self.train_model(train_df)
             if debug:
                 print('Performing Evaluation for fold {}/{}...'.format(fold+1, num_folds))
-            results_path = self._test_model(model, fold, limit=limit)
+            results_path = self._test_model(model, fold, limit=limit, custom_RecList=custom_RecList)
 
             fold_results_path.append(results_path)
 
