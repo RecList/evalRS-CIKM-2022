@@ -7,13 +7,17 @@ Official Repository for EvalRS @ CIKM 2022: a Rounded Evaluation of Recommender 
 
 *IMPORTANT*: [EvalRS](https://reclist.io/cikm2022-cup/) is a Data Challenge at [CIKM 2022](https://www.cikm2022.org/). This in-progress repository will host the official scripts and rules for the competition, which is planned for August 2022: add your e-mail [to challenge list](https://docs.google.com/forms/d/e/1FAIpQLSfAypzM1mvd79JfRGRbb9QMfXGMoVYosdjU9C4NFEWNSNUZXQ/viewform) to be notified of important events.
 
-This is the official repository for _EvalRS @ CIKM 2022: a Rounded Evaluation of Recommender Systems_. The aim of the challenge is to evaluate recommender systems across a set of important dimensions (accuracy being _one_ of them) through a principled and re-usable sets of abstractions, as provided by [RecList](https://github.com/jacopotagliabue/reclist) 🚀.
+This is the official repository for _EvalRS @ CIKM 2022: a Rounded Evaluation of Recommender Systems_. The aim of the challenge is to evaluate recommender systems across a set of important dimensions (accuracy being _one_ of them) through a principled and re-usable sets of abstractions, as provided by [RecList](https://github.com/jacopotagliabue/reclist) 🚀. During CIKM 2022, we will organize a workshop on rounded evaluation for RecSys, inviting all participants to attend, celebrate the winners, share their learnings wth the community and listen to keynotes from renown practitioners in the field.
 
 Please refer to the appropriate sections below to know how to register for the challenge and how to run the evaluation loop properly. For questions about the prize, the provided scripts and the rules, please join our [Slack](https://reclist.io/cikm2022-cup/).
 
 _We are working hard on this: check back often for updates._
 
-### Quick Links
+### Important dates
+
+Check the [EvalRS website](https://reclist.io/cikm2022-cup/) for the official timeline, including start date, paper submission and workshop day.
+
+### Quick links
 
 * 🛖 [EvalRS website](https://reclist.io/cikm2022-cup/)
 * 📚 [EvalRS paper](https://arxiv.org/abs/2207.05772)
@@ -92,14 +96,13 @@ P.s.: if something in the procedure goes wrong, please contact us through Slack!
 
 A valid submission script can be obtained by copying into your repository `submission.py`, and modify `my_runner.py` and the related model to use your logic instead of the default one. In theory, no change should be necessary to `submission.py`. Your submission is required to build an instance of the class `EvalRSRunner`, providing an implementation for the `train_model.py` method.
 
-In the `evaluation` folder, we included a lenghtier explanation of the evaluation code involved in this challenge; in the `notebooks` folder, we include a step-by-step, heavily commented guide on how to build a submission, including sample data points and an example of using a derived RecList for evaluation; in the `baselines` folder, you will find more complex models than the simple random one, as an inspiration. Remember: this competition as about models as much as about _data_ and _testing_ - take our initial work just as an inspiration!
+In the `evaluation` folder, we included a lenghtier explanation of the evaluation methodology involved in this challenge; in the `notebooks` folder, we include a step-by-step, heavily commented guide on how to build a submission, including sample data points and an example of using a derived RecList for evaluation; in the `baselines` folder, you will find more complex models than the simple random one, as an inspiration. Remember: this competition is about models as much as about _data_ and _testing_ - take our initial work just as an inspiration!
 
-Please refer to provided examples for in-depth explanations, and don't forget to reach out on Slack if you have any doubt.
+Please refer to the provided examples for in-depth explanations, and don't forget to reach out on Slack if you have any doubt.
 
 ## How easy it is to join?
 
-Very easy! If you already have a recommendation model you just need to wrap this in a way that
-is consistent with our own API. 
+Very easy! If you already have a recommendation model you just need to wrap training and prediction in objects consistent with our API. 
 
 ### Training
 
@@ -111,9 +114,11 @@ class MyEvalRSRunner(EvalRSRunner):
         Inherit from the Challenge class EvalRSRunner, and implement your training logic
         in this function. Return a trained model.
         """
-        my_model = MyModel(self.df_tracks)
-        my_model.train()
-        # return the trained model
+        # do your magic here
+        model.train(train_df)
+        # store your model into a model object - see below
+        my_model = MyModel(model)
+        # return the trained model in the proper wrapper
         return my_model
 ```
 
@@ -122,19 +127,16 @@ class MyEvalRSRunner(EvalRSRunner):
 ```python
 
 class MyModel:
-    def __init__(self, items: pd.DataFrame):
-        self.items = items
+    def __init__(self, model):
+       # implement your init logic here
+       self._model = model
 
     def predict(self, user_ids: pd.DataFrame, k=20) -> pd.DataFrame:
         """
-        Implement your logic here: given the user Ids in the test set, 
-        recommend the top-k songs for them.
+        Implement your logic here: given the user Ids in the test set, recommend the top-k songs for them.
         """
-        user_ids = user_ids['user_id'].values
-        num_users = len(user_ids)
-        pred = self.items.sample(n=k*num_users, replace=True)['track_id'].values
-        pred = pred.reshape(num_users, k )
-        pred = np.concatenate((np.array(user_ids).reshape(-1,1), pred), axis=1)
+        # do your magic here
+        pred = self._model.predict(user_ids, k)
         
         return pd.DataFrame(pred, columns=['user_id', *[ str(i) for i in range(k)]]).set_index('user_id')
 
@@ -143,6 +145,11 @@ class MyModel:
 ## Data Challenge Structures and Rules
 
 ### How the Data Challenge runs
+
+This is a _code competition_, so all teams are required to build and submit in the open: every artifact of this Data Challenge (including tests) is therefore available to the community by design. To partecipate in this Challenge, you are required to submit _your scores and your code_:
+
+* _when the challenge is running_, compare your progress by regularly submitting to the leaderboard: the final position in the leaderboard determines the winner and the prizes;
+* _before the challenge ends_, submit your code _following the guidelines and rules_ below: without a successful code submission (see below), a team won't be considered for the leaderboard.
 
 _TBC_
 
