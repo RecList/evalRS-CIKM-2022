@@ -126,7 +126,7 @@ class MyEvalRSRunner(EvalRSRunner):
 
 ```python
 
-class MyModel:
+class MyModel(RecModel):
     def __init__(self, model):
        # implement your init logic here
        self._model = model
