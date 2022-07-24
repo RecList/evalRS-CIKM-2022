@@ -114,10 +114,11 @@ class MyEvalRSRunner(EvalRSRunner):
         Inherit from the Challenge class EvalRSRunner, and implement your training logic
         in this function. Return a trained model.
         """
-        my_model = MyModel(self.df_tracks)
         # do your magic here
-        my_model.train()
-        # return the trained model
+        model.train(train_df)
+        # store your model into a model object - see below
+        my_model = MyModel(model)
+        # return the trained model in the proper wrapper
         return my_model
 ```
 
@@ -126,19 +127,16 @@ class MyEvalRSRunner(EvalRSRunner):
 ```python
 
 class MyModel:
-    def __init__(self, items: pd.DataFrame):
-        self.items = items
+    def __init__(self, model):
+       # implement your init logic here
+       self._model = model
 
     def predict(self, user_ids: pd.DataFrame, k=20) -> pd.DataFrame:
         """
-        Implement your logic here: given the user Ids in the test set, 
-        recommend the top-k songs for them.
+        Implement your logic here: given the user Ids in the test set, recommend the top-k songs for them.
         """
-        user_ids = user_ids['user_id'].values
-        num_users = len(user_ids)
-        pred = self.items.sample(n=k*num_users, replace=True)['track_id'].values
-        pred = pred.reshape(num_users, k )
-        pred = np.concatenate((np.array(user_ids).reshape(-1,1), pred), axis=1)
+        # do your magic here
+        pred = self._model.predict(user_ids, k)
         
         return pd.DataFrame(pred, columns=['user_id', *[ str(i) for i in range(k)]]).set_index('user_id')
 
