@@ -132,7 +132,7 @@ class EvalRSRunner(ABC):
     def evaluate(self, upload: bool, limit: int = None,  custom_RecList: RecList = None, debug=True):
         if limit:
             print("WARNING : LIMITING TEST EVENTS TO {} EVENTS ONLY - upload disable".format(limit))
-            # upload = False
+            upload = False
         if upload:
             assert self.email
             assert self.participant_id
