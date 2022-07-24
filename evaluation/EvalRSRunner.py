@@ -9,6 +9,8 @@
 """
 
 import os
+import inspect
+import hashlib
 from abc import ABC, abstractmethod
 import pandas as pd
 import time
@@ -55,11 +57,26 @@ class EvalRSRunner(ABC):
         assert os.path.exists(self.path_to_tracks)
         assert os.path.exists(self.path_to_users)
 
+        print("Loading dataset.")
         self._df_events = pd.read_parquet(self.path_to_events)
         self.df_tracks = pd.read_parquet(self.path_to_tracks)
         self.df_users = pd.read_parquet(self.path_to_users)
+
+        print("Generating dataset hashes.")
+        self._events_hash = hashlib.sha256(pd.util.hash_pandas_object(self._df_events.sample(n=1000,
+                                                                                             random_state=0)).values
+                                           ).hexdigest()
+        self._tracks_hash = hashlib.sha256(pd.util.hash_pandas_object
+                                           (self.df_tracks.sample(n=1000,random_state=0)
+                                                           .explode(['albums', 'albums_id'])).values
+                                           ).hexdigest()
+        self._users_hash = hashlib.sha256(pd.util.hash_pandas_object(self.df_users.sample(n=1000,
+                                                                                          random_state=0)).values
+                                          ).hexdigest()
+
         self._random_state = int(time.time()) if not seed else seed
         self._num_folds = num_folds
+        print("Generating data folds.")
         self._folds = self._generate_folds(num_folds, self._random_state)
 
     def _generate_folds(self, num_folds: int, seed: int) -> List[pd.DataFrame]:
@@ -115,7 +132,7 @@ class EvalRSRunner(ABC):
     def evaluate(self, upload: bool, limit: int = None,  custom_RecList: RecList = None, debug=True):
         if limit:
             print("WARNING : LIMITING TEST EVENTS TO {} EVENTS ONLY - upload disable".format(limit))
-            upload = False
+            # upload = False
         if upload:
             assert self.email
             assert self.participant_id
@@ -156,7 +173,8 @@ class EvalRSRunner(ABC):
         # build final output dict
         out_dict = {
             'reclist_reports': raw_results,
-            'results': agg_results
+            'results': agg_results,
+            'hash': hash(self)
         }
         # TODO: dump data somewhere better?
         local_file = '{}_{}.json'.format(self.email.replace('@', '_'), int(time.time()*10000))
@@ -169,6 +187,23 @@ class EvalRSRunner(ABC):
                               aws_secret_access_key=self.aws_secret_access_key,
                               participant_id=self.participant_id,
                               bucket_name=self.bucket_name)
+
+    def __hash__(self):
+        hash_inputs = [
+            self._num_folds,
+            self._events_hash,
+            self._users_hash,
+            self._tracks_hash,
+            inspect.getsource(self.evaluate).lstrip(' ').rstrip(' '),
+            inspect.getsource(self._test_model).lstrip(' ').rstrip(' '),
+            inspect.getsource(self._get_test_set).lstrip(' ').rstrip(' '),
+            inspect.getsource(self._get_train_set).lstrip(' ').rstrip(' '),
+            inspect.getsource(self._generate_folds).lstrip(' ').rstrip(' '),
+            inspect.getsource(self.__init__).lstrip(' ').rstrip(' '),
+            inspect.getsource(self.__hash__).lstrip(' ').rstrip(' '),
+        ]
+        hash_input = '_'.join([ str(_) for _ in  hash_inputs])
+        return int(hashlib.sha256(hash_input.encode()).hexdigest(), 16)
 
     @abstractmethod
     def train_model(self, train_df: pd.DataFrame):
