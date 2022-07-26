@@ -28,9 +28,10 @@ To make a new submission to the leaderboard you are just required to build two n
 First, you should inherit `EvalRSRunner` and implement the abstract method `train_model`: `train_model` should contain the model training code, _including any necessary hyper-parameter optimization_. By inheriting `EvalRSRunner`, you get access to necessary meta-data via `self.df_tracks` and `self.df_users`: you are free to use any modelling technique you want (collaborative filtering, two-tower etc.) as long as your code complies with the Data Challenge rules (no test leaking, hyperparameter and compute time within the budget etc.).
 
 Second, when the training is done, you should wrap your model in an object with a method `predict`: `train_model` should return this object as a result of training, since this is what the evaluation loop will use to get predictions and score them. The `predict` method accepts as input a dataframe of all the user IDs for which the model is asked to make a prediction on.
+
 For each `user_id`, we expect `k` predictions (where `k=X`). The expected prediction output is a dataframe with 
-`user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank).
-An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is as follows seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, 
+`user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank). In addition, it is expected that the predictions are in the same order as the `user_id` in the input dataframe.
+An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, 
 the empty columns should be filled with `-1`. 
 
  |           |  0          | ...        | k-1         | 
