@@ -33,7 +33,7 @@ For each `user_id`, we expect `k` predictions (where `k=X`). The expected predic
 An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is as follows seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, 
 the empty columns should be filled with `-1`. 
 
- |           |  0          | ...        | k           | 
+ |           |  0          | ...        | k-1         | 
 | ---------- | ----------  | ---------- | ----------- |
 | user_id_1  | track_id_1  | ...        | -1          |
 | user_id_2  | track_id_4  | ...        | track_id_5  |
