@@ -16,7 +16,7 @@ We provide two basic abstractions for the Data Challenge:
 
 We also provide out-of-the-box utility functions and a template script as an entry point for your final submission (`submission.py`). As long as your training and prediction logic respects the provided API, you should be able to easily adapt your model to the Data Challenge.
 
-During the _leaderboard phase_, you can submit your scores to the leaderboard running the code however you prefer.However, at _submission_, your repository needs to comply with the rules in the general `README`. Remember: if we are not able to reproduce your results and statistically verify your scores, you won't be eligible for the prize.
+During the _leaderboard phase_, you can submit your scores to the leaderboard running the code however you prefer. However, at _submission_, your repository needs to comply with the rules in the general `README`. Remember: if we are not able to reproduce your results and statistically verify your scores, you won't be eligible for the prize.
 
 ### Build your own evaluation loop
 
@@ -27,7 +27,19 @@ To make a new submission to the leaderboard you are just required to build two n
 
 First, you should inherit `EvalRSRunner` and implement the abstract method `train_model`: `train_model` should contain the model training code, _including any necessary hyper-parameter optimization_. By inheriting `EvalRSRunner`, you get access to necessary meta-data via `self.df_tracks` and `self.df_users`: you are free to use any modelling technique you want (collaborative filtering, two-tower etc.) as long as your code complies with the Data Challenge rules (no test leaking, hyperparameter and compute time within the budget etc.).
 
-Second, when the training is done, you should wrap your model in an object with a method `predict`: `train_model` should return this object as a result of training, since this is what the evaluation loop will use to get predictions and score them. The `predict` method accepts as input all the user IDs for which the model is asked to make a prediction. 
+Second, when the training is done, you should wrap your model in an object with a method `predict`: `train_model` should return this object as a result of training, since this is what the evaluation loop will use to get predictions and score them. The `predict` method accepts as input a dataframe of all the user IDs for which the model is asked to make a prediction on.
+For each `user_id`, we expect `k` predictions (where `k=X`). The expected prediction output is a dataframe with 
+`user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank).
+An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is as follows seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, 
+the empty columns should be filled with `-1`. 
+
+ |           |  0          | ...        | k           | 
+| ---------- | ----------  | ---------- | ----------- |
+| user_id_1  | track_id_1  | ...        | -1          |
+| user_id_2  | track_id_4  | ...        | track_id_5  |
+| ...        | ...         | ...        | -1          |
+| user_id_n  | track_id_18 | ...        | track_id_9  |
+
 
 _Implementing the class, and returning the trained model in the proper wrapper:_
 
