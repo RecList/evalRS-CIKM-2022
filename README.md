@@ -258,11 +258,11 @@ This Data Challenge focuses on building in the open, and adding lasting artifact
 
 This Data Challenge is open and possible thanks to the generous support of these awesome folks. Make sure to add a star to [our library](https://github.com/jacopotagliabue/reclist) and check them out!
 
-![https://neptune.ai](https://github.com/jacopotagliabue/reclist/raw/main/images/neptune.png)
+![https://neptune.ai](https://github.com/jacopotagliabue/reclist/raw/main/images/neptune.png | width=200)
 
-![https://www.comet.com/?utm_source=jacopot&utm_medium=referral&utm_campaign=online_jacopot_2022&utm_content=github_reclist](https://github.com/jacopotagliabue/reclist/raw/main/images/comet.png)
+![https://www.comet.com/?utm_source=jacopot&utm_medium=referral&utm_campaign=online_jacopot_2022&utm_content=github_reclist](https://github.com/jacopotagliabue/reclist/raw/main/images/comet.png | width=200)
 
-![https://gantry.io/](https://github.com/jacopotagliabue/reclist/raw/main/images/gantry.png)
+![https://gantry.io/](https://github.com/jacopotagliabue/reclist/raw/main/images/gantry.png | width=200)
 
 ## How to Cite
 
