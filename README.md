@@ -121,7 +121,7 @@ Very easy! If you already have a recommendation model you just need to wrap trai
 ```python
 
 class MyEvalRSRunner(EvalRSRunner):
-    def train_model(self, train_df: pd.DataFrame):
+    def train_model(self, train_df: pd.DataFrame, **kwargs):
         """
         Inherit from the Challenge class EvalRSRunner, and implement your training logic
         in this function. Return a trained model.
@@ -139,6 +139,7 @@ class MyEvalRSRunner(EvalRSRunner):
 ```python
 
 class MyModel(RecModel):
+    
     def __init__(self, model, top_k=20):
        # implement your init logic here
        self._model = model
@@ -194,8 +195,8 @@ _The final submission_
 * Before the end of the Challenge, you are required to submit three artifacts to be eligible for the prize: your code, your paper and one (or more) custom tests;
 * your code should be submitted as a Github public repository containing your solution, a Dockerfile with the required dependencies and a MIT license (or similar open source license). After building the container, we should be able to run the evaluation loop in your code in the same way we run the example script in this repository (i.e. follow the instructions in this repo to make sure you utilize the template scripts properly). Please make sure to state in your README any information useful to run the project. _A successful submission MUST run a full evaluation loop on a EC2 XXX in less than YYY minutes._;
 * it’s at the sole discretion of the committee to decide whether / how to run the received project for independent verification of your leaderboard score; the committee decision is final. Failing to submit a project with the required information will result in the team being disqualified, irrespective of their leaderboard position;
-* irrespectively of their leaderboard position, we asked teams to submit _at least a short design paper_ (details below), or a longer one, if they wish to do so. Note that we have a prize specifically geared towards paper quality;
-* irrespectively of their leaderboard position, we asked teams to submit _at least one new RecTest_ (the tutorial in the `notebooks` folder shows how to successfully extend the given RecList with your tests). Your test may be as simple as a "unit test" around a specific user, or song, or data slice, or as complex as re-using the provided latent space to evaluate robustness or serendipity. Note that we have a prize specifically geared towards novel tests. A huge motivation for this challenge is to foster a debate around testing, and sharing insights will make the community richer: all the artifacts of the competition are by design built in the open, and we encourage every practitioner to contribute with their ingenuity.
+* irrespectively of their leaderboard position, we asked teams to submit _at least a short design paper_ (details below), or a longer one, if they wish to do so. Note that we have a prize specifically geared towards paper quality. The paper (long or short) should detail the testing approach, with reference to literature, the target dataset or the insights gained by having proper testing when iterating on the leaderboard;
+* irrespectively of their leaderboard position, we asked teams to submit _at least one new RecTest_ (the tutorial in the `notebooks` folder shows how to successfully extend the given RecList with your tests). Your test may be as simple as a "unit test" around a specific user, or song, or data slice, or as complex as re-using the provided latent space to evaluate robustness or serendipity: make sure to describe motivations and test logic in your paper (short or long). Note that we have a prize specifically geared towards novel tests. A huge motivation for this challenge is to foster a debate around testing, and sharing insights will make the community richer: all the artifacts of the competition are by design built in the open, and we encourage every practitioner to contribute with their ingenuity.
 
 _The prizes_
 

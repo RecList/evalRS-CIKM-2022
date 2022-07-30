@@ -4,6 +4,7 @@ from reclist.abstractions import RecModel
 
 
 class RandomModel(RecModel):
+    
     def __init__(self, items: pd.DataFrame, top_k: int=20):
         super(RandomModel, self).__init__()
         self.items = items

@@ -45,7 +45,8 @@ _Implementing the class, and returning the trained model in the proper wrapper:_
 ```python
 
 class MyEvalRSRunner(EvalRSRunner):
-    def train_model(self, train_df: pd.DataFrame):
+
+    def train_model(self, train_df: pd.DataFrame, **kwargs):
         """
         Inherit from the Challenge class EvalRSRunner, and implement your training logic
         in this function. Return a trained model.
@@ -63,6 +64,7 @@ _Example of a model wrapper implementing the predict method_
 ```python
 
 class MyModel(RecModel):
+
     def __init__(self, model, top_k=20):
        # implement your init logic here
        self._model = model

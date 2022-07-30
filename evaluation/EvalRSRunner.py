@@ -135,9 +135,11 @@ class EvalRSRunner(ABC):
         limit: int = 0,  
         top_k: int = 20, 
         custom_RecList: RecList = None, 
-        debug=True
+        debug=True,
+        **kwargs
     ):
-        if self._num_folds != 4 or top_k != 20 or limit != 0:
+        num_folds = len(self._folds)
+        if num_folds != 4 or top_k != 20 or limit != 0:
             print("\nWARNING: default values are not used - upload is disabled")
             upload = False
         # if upload, check we have the necessary credentials
@@ -147,14 +149,13 @@ class EvalRSRunner(ABC):
             assert self.aws_access_key_id
             assert self.aws_secret_access_key
             assert self.bucket_name
-
-        num_folds = len(self._folds)
+        
         fold_results_path = []
         for fold in range(num_folds):
             train_df = self._get_train_set(fold=fold)
             if debug:
                 print('\nPerforming Training for fold {}/{}...'.format(fold+1, num_folds))
-            model = self.train_model(train_df)
+            model = self.train_model(train_df, **kwargs)
             if debug:
                 print('Performing Evaluation for fold {}/{}...'.format(fold+1, num_folds))
             results_path = self._test_model(model, fold, limit=limit, custom_RecList=custom_RecList)
@@ -214,5 +215,5 @@ class EvalRSRunner(ABC):
         return int(hashlib.sha256(hash_input.encode()).hexdigest(), 16)
 
     @abstractmethod
-    def train_model(self, train_df: pd.DataFrame):
+    def train_model(self, train_df: pd.DataFrame, **kwargs):
         raise NotImplementedError

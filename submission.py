@@ -52,5 +52,13 @@ if __name__ == '__main__':
         email=EMAIL
         )
     print('==== Runner loaded, starting loop at: {} ====\n'.format(datetime.utcnow()))
-    runner.evaluate(upload=UPLOAD, limit=LIMIT, top_k=TOP_K)
+    runner.evaluate(
+        upload=UPLOAD, 
+        limit=LIMIT, 
+        top_k=TOP_K,
+        # kwargs may contain additional arguments in case, for example, you 
+        # have data augmentation functions that you wish to use in combination
+        # with the dataset provided by the runner.
+        my_custom_argument='my_custom_argument'  
+        )
     print('\n\n==== Evaluation ended at: {} ===='.format(datetime.utcnow()))
