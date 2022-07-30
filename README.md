@@ -201,20 +201,20 @@ _The prizes_
 
 Thanks to our generous sponsors, the following prizes will be awarded (at the sole discretion of the committee):
 
-* a winner prize, 3000 USD, for the first position in the leaderboard (subject to a complete submission as descrived above);
-* a runner-prize, 1000 USD, for the first position in the leaderboard;
-* two (2) RecList prizes, 500 USD each, for outstanding contributions to the challenge in the form of an oustanding paper and / or particularly novel / creative testing methodologies and / or clever data augmentation strategies;
-* 5 CIKM virtual attendance tickets to 5 students (on different projects, subject to a complete submission). Organizers will decide the awards considering submission quality and students' backgrounds (precedence to students from under-represented backgrounds). Students can write the paper with other researchers, but they have to appear as the first author in the submitted paper to qualify for the prize.
+* a winner prize, 3000 USD, for the first position in the leaderboard (subject to a complete submission as described above);
+* a runner-up prize, 1000 USD, for the second position in the leaderboard;
+* two (2) RecList prizes, 500 USD each, for exceptional contributions in the form of an oustanding paper and / or novel / creative testing methodologies and / or clever data augmentation strategies;
+* 5 CIKM virtual attendance tickets to 5 students (on different projects, subject to a complete submission): organizers will consider submission quality and students' backgrounds (precedence to students from under-represented backgrounds). Students can write the paper with other researchers, but they have to appear as the first author in the submitted paper to qualify for the prize.
 
 ### Call for Papers
 
-We invite the submissions of two types of paper: short design papers (2 pages plus references) in which authors can describe briefly described their model and their testing strategies, or longer regular papers (5 pages plus references), in which authors may provide a lengthier description of their approach, engage with the relevant literature and detail the testing strategies they adopted. Teams are required to submit _at least a short paper_ for their submission, but only regular papers will be published through CEUR in the workshop proceedings.
+We invite the submissions of two types of paper: short design papers (2 pages plus references) in which authors can briefly describe their model and tests, or longer regular papers (5 pages plus references), in which authors may provide a lengthier description of their approach, engage with the relevant literature and detail the testing strategies they adopted. Teams are required to submit _at least a short paper_ for their submission, but only regular papers will be published through CEUR in the workshop proceedings (all papers will be archived in this repository and all authors will have a chance to present at the hybrid workshop during CIKM).
 
-Submissions should follow the [CEUR Template](https://it.overleaf.com/latex/templates/template-for-submissions-to-ceur-workshop-proceedings-ceur-ws-dot-org/wqyfdgftmcfw). All the papers will be peer reviewed (single blind, the papers should _not_ be anynomyzed) by two experts each: reviews are mainly meant at improving and clarifying the work, and ensure the necessarily scholarly standards for CIKM (reference, clarity, rigor). 
+Submissions should follow the [CEUR Template](https://it.overleaf.com/latex/templates/template-for-submissions-to-ceur-workshop-proceedings-ceur-ws-dot-org/wqyfdgftmcfw). All papers will be peer reviewed (single blind, the papers should _not_ be anynomyzed) by two experts each: reviews are mainly meant at improving and clarifying the work, and ensure the necessarily scholarly standards for CIKM (reference, clarity, rigor). 
 
 _Paper structure_
 
-To help students and younger researchers, we suggest some important questions / structures for the papers.
+To help students and younger researchers, we suggest some important questions / common sections for the papers.
 
 Short design papers should answer the following questions:
 
