@@ -29,9 +29,8 @@ First, you should inherit `EvalRSRunner` and implement the abstract method `trai
 
 Second, when the training is done, you should wrap your model in an object with a method `predict`: `train_model` should return this object as a result of training, since this is what the evaluation loop will use to get predictions and score them. The `predict` method accepts as input a dataframe of all the user IDs for which the model is asked to make a prediction on.
 
-For each `user_id`, we expect `k` predictions (where `k=X`). The expected prediction output is a dataframe with 
-`user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank). In addition, it is expected that the predictions are in the same order as the `user_id` in the input dataframe.
-An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, 
+For each `user_id`, we expect `k` predictions (where `k=20`): you can play around with different Ks for debugging purposes _but_ only K=20 will be accepted for the leaderboard. The expected prediction output is a dataframe with 
+`user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank). In addition, it is expected that the predictions are in the same order as the `user_id` in the input dataframe. An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, 
 the empty columns should be filled with `-1`. 
 
  |           |  0          | ...        | k-1         | 
@@ -55,7 +54,7 @@ class MyEvalRSRunner(EvalRSRunner):
         # do your magic here
         model.train(train_df)
         # store your model into a model object - see below
-        my_model = MyModel(model)
+        my_model = MyModel(model, top_k=20))
         # return the trained model in the proper wrapper
         return my_model
 ```
@@ -64,15 +63,17 @@ _Example of a model wrapper implementing the predict method_
 
 ```python
 
-class MyModel:
-    def __init__(self, model):
+class MyModel(RecModel):
+    def __init__(self, model, top_k=20):
        # implement your init logic here
        self._model = model
+       self.top_k = top_k
 
-    def predict(self, user_ids: pd.DataFrame, k=20) -> pd.DataFrame:
+    def predict(self, user_ids: pd.DataFrame) -> pd.DataFrame:
         """
         Implement your logic here: given the user Ids in the test set, recommend the top-k songs for them.
         """
+        k = self.top_k
         # do your magic here
         pred = self._model.predict(user_ids, k)
         

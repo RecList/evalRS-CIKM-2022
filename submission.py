@@ -26,10 +26,16 @@ AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')  # you received it in your e-mail
 AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY')  # you received it in your e-mail
 UPLOAD = bool(os.getenv('UPLOAD'))  # it's a boolean, True if you want to upload your submission
 LIMIT = int(os.getenv('LIMIT'))  # limit the number of test cases, for quick tests / iterations. 0 for no limit
+FOLDS = int(os.getenv('FOLDS'))  # number of folds for evaluation
+TOP_K = int(os.getenv('TOP_K'))  # number of recommendations to be provided by the model
+
 
 print("Submission will be uploaded: {}".format(UPLOAD))
 if LIMIT > 0:
-    print("WARNING: only {} test cases will be used".format(LIMIT))
+    print("\nWARNING: only {} test cases will be used".format(LIMIT))
+if FOLDS != 4 or TOP_K != 20 or LIMIT != 0:
+    print("\nWARNING: default values are not used - the evaluation will run locally but won't be considered for the leaderboard")
+
 
 # run the evaluation loop when the script is called directly
 if __name__ == '__main__':
@@ -38,7 +44,7 @@ if __name__ == '__main__':
     print('\n\n==== Starting evaluation script at: {} ====\n'.format(datetime.utcnow()))
     # run the evaluation loop
     runner = MyEvalRSRunner(
-        num_folds=4,
+        num_folds=FOLDS,
         aws_access_key_id=AWS_ACCESS_KEY,
         aws_secret_access_key=AWS_SECRET_KEY,
         participant_id=PARTICIPANT_ID,
@@ -46,5 +52,5 @@ if __name__ == '__main__':
         email=EMAIL
         )
     print('==== Runner loaded, starting loop at: {} ====\n'.format(datetime.utcnow()))
-    runner.evaluate(upload=UPLOAD, limit=LIMIT)
+    runner.evaluate(upload=UPLOAD, limit=LIMIT, top_k=TOP_K)
     print('\n\n==== Evaluation ended at: {} ===='.format(datetime.utcnow()))

@@ -129,10 +129,18 @@ class EvalRSRunner(ABC):
         report_path = rlist()
         return report_path
 
-    def evaluate(self, upload: bool, limit: int = None,  custom_RecList: RecList = None, debug=True):
-        if limit:
-            print("WARNING : LIMITING TEST EVENTS TO {} EVENTS ONLY - upload disable".format(limit))
+    def evaluate(
+        self, 
+        upload: bool, 
+        limit: int = 0,  
+        top_k: int = 20, 
+        custom_RecList: RecList = None, 
+        debug=True
+    ):
+        if self._num_folds != 4 or top_k != 20 or limit != 0:
+            print("\nWARNING: default values are not used - upload is disabled")
             upload = False
+        # if upload, check we have the necessary credentials
         if upload:
             assert self.email
             assert self.participant_id

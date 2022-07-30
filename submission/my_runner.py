@@ -19,4 +19,4 @@ class MyEvalRSRunner(EvalRSRunner):
         At the end of training, you should return a model class that implements the `predict` method,
         as RandomModel does.
         """
-        return RandomModel(self.df_tracks)
+        return RandomModel(self.df_tracks, top_k=20)

@@ -73,8 +73,20 @@ pip install -r requirements.txt
 ```
 
 We use dot files to manage secret keys. Copy the `local.env` file and create an 
-`upload.env` (**DO NOT** commit this file). You can fill this file with the keys you got
-at step 1.
+`upload.env` (**DO NOT** commit this file). You can fill this file with the keys you got at step 1 plus some global configurations:
+
+
+| VARIABLE | TYPE (DEFAULT) | MEANING |
+| ------------- | ------------- | ------------- |
+| BUCKET_NAME | string  | Bucket name from your registration e-mail |
+| EMAI | string  | E-mail used for registration |
+| PARTICIPANT_ID | string  | Id from your registration e-mail  |
+| AWS_ACCESS_KEY | string  | AWS access from your registration e-mail  |
+| AWS_SECRET_KEY | string  | AWS key from your registration e-mail  |
+| UPLOAD | 1/0 (1)  | Boolean, 1 to upload your scores to the leaderboard. NOTE: scores are uploaded only if LIMIT, TOP_K, and FOLDS have default values.  |
+| LIMIT | int (0)  | Number of test cases to use (0 = all). Limiting the test set size is useful for quick local debugging and iterations. Only runs with LIMIT=0 are considered for the leaderboard.  |
+| TOP_K | int (20)  | Number of tracks to recommend for each users in the test set. Changing _k_ is useful for quick debugging. Only runs with TOP_K=20 are considered for the leaderboard.  |
+| FOLDS | int (4)  | Number of folds for the evaluation loop (see methodology below). Only runs with FOLDS=4 are considered for the leaderboard. |
 
 Now, run
 
@@ -117,7 +129,7 @@ class MyEvalRSRunner(EvalRSRunner):
         # do your magic here
         model.train(train_df)
         # store your model into a model object - see below
-        my_model = MyModel(model)
+        my_model = MyModel(model, top_k=20))
         # return the trained model in the proper wrapper
         return my_model
 ```
@@ -127,14 +139,16 @@ class MyEvalRSRunner(EvalRSRunner):
 ```python
 
 class MyModel(RecModel):
-    def __init__(self, model):
+    def __init__(self, model, top_k=20):
        # implement your init logic here
        self._model = model
+       self.top_k = top_k
 
-    def predict(self, user_ids: pd.DataFrame, k=20) -> pd.DataFrame:
+    def predict(self, user_ids: pd.DataFrame) -> pd.DataFrame:
         """
         Implement your logic here: given the user Ids in the test set, recommend the top-k songs for them.
         """
+        k = self.top_k
         # do your magic here
         pred = self._model.predict(user_ids, k)
         
@@ -142,27 +156,89 @@ class MyModel(RecModel):
 
 ```
 
+At prediction time, your function will be fed by our evaluation script with a list of users to provide track recommendations to: you should return a DataFrame echoing the user IDs and then as many columns as the `top-k` parameter specifies:
+
+![https://reclist.io/](images/prediction.jpg)
+
+Your prediction dataframe will also be automatically fed to RecList for evaluation and leaderboard updates. In other words, as long as your `predict` methods comply with this signature, the rest of the workflow is handled magically for you by the evaluation script.
+
 ## Data Challenge Structures and Rules
 
 ### How the Data Challenge runs
 
-This is a _code competition_, so all teams are required to build and submit in the open: every artifact of this Data Challenge (including tests) is therefore available to the community by design. To partecipate in this Challenge, you are required to submit _your scores and your code_:
+This is a _code competition_, so all teams are required to build and submit in the open: every artifact of this Data Challenge (including tests) is therefore available to the community by design. To partecipate in this Challenge, you are required to submit _your scores AND your code_:
 
-* _when the challenge is running_, compare your progress by regularly submitting to the leaderboard: the final position in the leaderboard determines the winner and the prizes;
+* _when the challenge is running_, compare your progress by regularly submitting to the leaderboard: the final position in the leaderboard is used to determine the winners and assign the prizes (below);
 * _before the challenge ends_, submit your code _following the guidelines and rules_ below: without a successful code submission (see below), a team won't be considered for the leaderboard.
 
-_TBC_
+Please read carefully the rules and guidelines below and reach out on Slack if you have any doubt.
 
-### Rules
+_IMPORTANT_: a code competition is by necessity (and philosophy) based on a honor code: while we made all the possible arrangements to prevent cheating, we, in the end, must also rely on the good faith of all teams. If you are in doubt regarding any of the rules, please remember the spirit behind EvalRS and always act accordingly.
 
-_TBC_
+### Methodology
+
+To avoid cheating when running a competition on a known public dataset, we adopted `Bootstrapped Nested Cross-Validation` as our [methodology](https://arxiv.org/abs/2207.05772). Every time you run one evaluation loop, the ready-made script will prepare 4 random partitions of the dataset, and assign them to the training or testing set for a total of 4 permutations: each time, the training set will be fed to the training function (that you will implement with your logic), and then testing will happen on the predictions (according again to your implementation of the prediction routine). Results from each training+testing step will be aggregated and sent to the leaderboard. At the end of the competition, you will submit your code to the committee, which should be able, if necessary, to run it and statistically verify that the metrics on the leaderboard are sound.
+
+### Rules and Prizes
+
+_When the challenge is running_
+
+* Everytime you run the evaluation loop, scores on individual folds and the aggregate metrics are sent to the leaderboard. Leaderboard position is determined by our macro-score, as defined in the `evaluation` README with all the tests. For each team, the leaderboard consider only the _best_  macro-score;
+* the evaluation is a mix of standard quantitative tests, slice-best metrics and behavioral ones, as abstracted away through [RecList](https://reclist.io/). Tests are defined precisely in the `evaluation` README. For background on behavioral testing, please consult the [original paper](https://arxiv.org/abs/2111.09963);
+* given the statistical nature of the evaluation, every run will be slightly different, but it will be possible for the committee to statistically verif at the end that the results are correct. Tested projects that are statistically "too far" from the submitted scores will be disqualified;
+* you can submit as many times as you’d like, or even run the evluation loop locally with different env variables for testing or debugging. Remember that you can only submit your score if you specify `UPLOAD=1` and the evaluation variables have their default values;
+* you should not, for any reason, tamper with the evaluation script, or modify it to allow cheating: for example, you should not use in any way the test fold in your code. If you’re unsure how to use it, please reach out on Slack at any time. 
+
+_The final submission_
+
+* Before the end of the Challenge, you are required to submit three artifacts to be eligible for the prize: your code, your paper and one (or more) tests;
+* your code should be submitted as a Github public repository containing your solution, a Dockerfile with the required dependencies and a MIT license (or similar open source license). After building the container, we should be able to run the evaluation loop in your code in the same way we run the example script in this repository (i.e. follow the instructions in this repo to make sure you utilize the template scripts properly). Please make sure to state in your README any information useful to run the project. _A successful submission MUST run a full evaluation loop on a EC2 XXX in less than YYY minutes._;
+* it’s at the sole discretion of the committee to decide whether / how to run the received project for independent verification of your leaderboard score; the committee decision is final. Failing to submit a project with the required information will result in the team being disqualified, irrespective of their leaderboard position;
+* irrespectively of their leaderboard position, we asked teams to submit _at least a short design paper_ (details below), or even a longer one, if they wish to do so. Note that we have a prize specifically geared towards paper quality;
+* irrespectively of their leaderboard position, we asked teams to submit _at least one new RecTest_ (the tutorial in the `notebooks` folder shows how to successfully extend the given RecList with your tests). Your test may be as simple as a "unit test" around a specific user, or song, or data slice, or as complex as re-using the provided latent space to evaluate robustness or serendipity. Note that we have a prize specifically geared towards novel tests. A huge motivation for this challenge is to foster a debate around testing, and sharing insights will make the community richer: all the artifacts of the competition are by design built in the open, and we encourage every practitioner to contribute with their ingenuity.
+
+_The prizes_
+
+Thanks to our generous sponsors, the following prizes will be awarded (at the sole discretion of the committee):
+
+* a winner prize, 3000 USD, for the first position in the leaderboard (subject to a complete submission as descrived above);
+* a runner-prize, 1000 USD, for the first position in the leaderboard;
+* two (2) RecList prizes, 500 USD each, for outstanding contributions to the challenge in the form of an oustanding paper and / or particularly novel / creative testing methodologies and / or clever data augmentation strategies;
+* 5 CIKM virtual attendance tickets to 5 students (on different projects, subject to a complete submission). Organizers will decide the awards considering submission quality and students' backgrounds (precedence to students from under-represented backgrounds). Students can write the paper with other researchers, but they have to appear as the first author in the submitted paper to qualify for the prize.
 
 ### Call for Papers
 
-_TBC_
+We invite the submissions of two types of paper: short design papers (2 pages plus references) in which authors can describe briefly described their model and their testing strategies, or longer regular papers (5 pages plus references), in which authors may provide a lengthier description of their approach, engage with the relevant literature and detail the testing strategies they adopted. Teams are required to submit _at least a short paper_ for their submission, but only regular papers will be published through CEUR in the workshop proceedings.
 
+Submissions should follow the [CEUR Template](https://it.overleaf.com/latex/templates/template-for-submissions-to-ceur-workshop-proceedings-ceur-ws-dot-org/wqyfdgftmcfw). All the papers will be peer reviewed (single blind, the papers should _not_ be anynomyzed) by two experts each: reviews are mainly meant at improving and clarifying the work, and ensure the necessarily scholarly standards for CIKM (reference, clarity, rigor). 
+
+_Paper structure_
+
+To help students and younger researchers, we suggest some important questions / structures for the papers.
+
+Short design papers should answer the following questions:
+
+* Which is the model used in the challenge?
+* Which errors did the model make? What did I learned iterating on different tests?
+* Did the competition help in debugging RecSys errors?
+
+Regular papers should be structured roughly as follows:
+
+* Introduction: describing the challenge and citing related work;
+* Method: describing the solution adopted;
+* Experiments
+* Data: if any additional pre-processing has been run;
+* Hyperparameters: detail on any setup defined for reproducibility;
+* Results
+* Error analysis
+* Discussion and Reflection: an analysis of the results and on the test, and the possible future of testing recommender systems. We are happy to see ideas and speculations.
+* Conclusions
+
+Please note that an additional page will be given to integrate reviewers' comments.
 
 ## FAQ
+
+* _Can I add information to the dataset provided in the competition?_ Yes, data augmentation strategies are not just allowed, but encorauged, as they will enrich the community with new features after the competition. If you augment the dataset, please state it clearly in your submission and make sure to leverage the additional information in your tests.
 
 _TBC_
 
@@ -180,8 +256,38 @@ This Data Challenge focuses on building in the open, and adding lasting artifact
 
 ## Sponsors
 
-TBC
+This Data Challenge is open and possible thanks to the generous support of these awesome folks. Make sure to add a star to [our library](https://github.com/jacopotagliabue/reclist) and check them out!
+
+![https://neptune.ai](https://github.com/jacopotagliabue/reclist/raw/main/images/neptune.png)
+
+![https://www.comet.com/?utm_source=jacopot&utm_medium=referral&utm_campaign=online_jacopot_2022&utm_content=github_reclist](https://github.com/jacopotagliabue/reclist/raw/main/images/comet.png)
+
+![https://gantry.io/](https://github.com/jacopotagliabue/reclist/raw/main/images/gantry.png)
 
 ## How to Cite
 
-TBC
+If you find our code, datasets, tests useful in your work, please cite the original WebConf contribution as well as the EvalRS paper.
+
+_RecList_
+
+```
+@inproceedings{Chia2021BeyondNB,
+  title={Beyond NDCG: behavioral testing of recommender systems with RecList},
+  author={Patrick John Chia and Jacopo Tagliabue and Federico Bianchi and Chloe He and Brian Ko},
+  year={2021}
+}
+```
+
+_EvalRS_
+
+```
+@misc{https://doi.org/10.48550/arxiv.2207.05772,
+  doi = {10.48550/ARXIV.2207.05772},
+  url = {https://arxiv.org/abs/2207.05772},
+  author = {Tagliabue, Jacopo and Bianchi, Federico and Schnabel, Tobias and Attanasio, Giuseppe and Greco, Ciro and Moreira, Gabriel de Souza P. and Chia, Patrick John},
+  title = {EvalRS: a Rounded Evaluation of Recommender Systems},
+  publisher = {arXiv},
+  year = {2022},
+  copyright = {Creative Commons Attribution 4.0 International}
+}
+```

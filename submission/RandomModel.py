@@ -4,11 +4,12 @@ from reclist.abstractions import RecModel
 
 
 class RandomModel(RecModel):
-    def __init__(self, items: pd.DataFrame):
+    def __init__(self, items: pd.DataFrame, top_k: int=20):
         super(RandomModel, self).__init__()
         self.items = items
+        self.top_k = top_k
 
-    def predict(self, user_ids: pd.DataFrame, k=10) -> pd.DataFrame:
+    def predict(self, user_ids: pd.DataFrame) -> pd.DataFrame:
         """
         
         This function takes as input all the users that we want to predict the top-k items for, and 
@@ -18,6 +19,7 @@ class RandomModel(RecModel):
         would allow for batch predictions of all the target data points.
         
         """
+        k = self.top_k
         num_users = len(user_ids)
         pred = self.items.sample(n=k*num_users, replace=True).index.values
         pred = pred.reshape(num_users, k)
