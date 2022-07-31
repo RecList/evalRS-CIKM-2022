@@ -35,18 +35,18 @@ class EvalRSRunner(ABC):
                  bucket_name: str = None,
                  force_download: bool = False):
         # download dataset
-        self.path_to_dataset = os.path.join(get_cache_directory(), 'lfm_1b_dataset')
+        self.path_to_dataset = os.path.join(get_cache_directory(), 'evalrs_dataset')
         if not os.path.exists(self.path_to_dataset) or force_download:
             print("Downloading LFM dataset...")
-            download_with_progress(LFM_DATASET_PATH, os.path.join(get_cache_directory(), 'lfm_1b_dataset.zip'))
-            decompress_zipfile(os.path.join(get_cache_directory(), 'lfm_1b_dataset.zip'),
+            download_with_progress(LFM_DATASET_PATH, os.path.join(get_cache_directory(), 'evalrs_dataset.zip'))
+            decompress_zipfile(os.path.join(get_cache_directory(), 'evalrs_dataset.zip'),
                                     get_cache_directory())
         else:
             print("LFM dataset already downloaded. Skipping download.")
 
-        self.path_to_events = os.path.join(self.path_to_dataset, 'LFM-1b_events.pk')
-        self.path_to_tracks = os.path.join(self.path_to_dataset, 'LFM-1b_tracks.pk')
-        self.path_to_users = os.path.join(self.path_to_dataset, 'LFM-1b_users.pk')
+        self.path_to_events = os.path.join(self.path_to_dataset, 'evalrs_events.csv')
+        self.path_to_tracks = os.path.join(self.path_to_dataset, 'evalrs_tracks.csv')
+        self.path_to_users = os.path.join(self.path_to_dataset, 'evalrs_users.csv')
         self.email = email
         self.participant_id = participant_id
         self.aws_access_key_id = aws_access_key_id
@@ -58,9 +58,23 @@ class EvalRSRunner(ABC):
         assert os.path.exists(self.path_to_users)
 
         print("Loading dataset.")
-        self._df_events = pd.read_parquet(self.path_to_events)
-        self.df_tracks = pd.read_parquet(self.path_to_tracks)
-        self.df_users = pd.read_parquet(self.path_to_users)
+        # TODO: Verfiy dtype do not cause overflow
+        self._df_events = pd.read_csv(self.path_to_events, index_col=0, dtype='int32')
+        self.df_tracks = pd.read_csv(self.path_to_tracks,
+                                     dtype={
+                                         'track_id':'int32',
+                                         'artist_id':'int32'
+                                     })
+        self.df_users = pd.read_csv(self.path_to_users,
+                                    dtype={
+                                        'user_id': 'int32',
+                                        'playcount': 'int32',
+                                        'country_id': 'int32',
+                                        'timestamp': 'int32',
+                                        'age': 'int32',
+                                    })
+
+
 
         print("Generating dataset hashes.")
         self._events_hash = hashlib.sha256(pd.util.hash_pandas_object(self._df_events.sample(n=1000,
@@ -79,45 +93,55 @@ class EvalRSRunner(ABC):
         print("Generating data folds.")
         self._folds = self._generate_folds(num_folds, self._random_state)
 
-    def _generate_folds(self, num_folds: int, seed: int) -> List[pd.DataFrame]:
-        df_rand = self._df_events.sample(frac=1.0, replace=False, random_state=seed)
-        folds = np.array_split(df_rand, num_folds)
-        # some mem management
-        del self._df_events
+    def _generate_folds(self, num_folds: int, seed: int) -> List[dict]:
+        folds = []
+        df_groupby = self._df_events.groupby(by='user_id', as_index=False)
+        for i in range(num_folds):
+            print("Generating Fold {}/{}".format(i+1, num_folds))
+            df_test = df_groupby.sample(n=1, replace=True, random_state=seed+i)[['user_id','track_id']]
+            df_train = self._df_events.drop(df_test.index)
+            folds.append({
+                'train': df_train,
+                'test': df_test
+            })
+        # del self._df_events
         return folds
 
     def _get_train_set(self, fold: int) -> pd.DataFrame:
         assert fold < len(self._folds)
-        return pd.concat([self._folds[idx] for idx in range(len(self._folds)) if idx != fold])
+        return self._folds[fold]['train']
+        # return pd.concat([self._folds[idx] for idx in range(len(self._folds)) if idx != fold])
+
 
     def _get_test_set(self, fold: int, limit: int = None) -> pd.DataFrame:
-        if limit:
-            print('WARNING : LIMITING TEST EVENTS TO {} EVENTS ONLY'.format(limit))
-        # get held-out split
-        test_set_events = self._folds[fold] if not limit else self._folds[fold].head(limit)
-        # get tracks listened by user
-        test_set = (test_set_events[['user_id', 'track_id']]
-                    .groupby(by=['user_id'])['track_id']
-                    .apply(set)
-                    .apply(list))
-        # save index
-        test_set_index = test_set.index.to_numpy()
-        # convert to list of list
-        test_set = test_set.tolist()
-        # convert to pd.DataFrame; columns are tracks
-        test_set_df = pd.DataFrame(test_set).fillna(value=-1).astype(np.int64)
-        # set index to original index
-        test_set_df['user_id'] = test_set_index
-        test_set_df.columns = [str(_) for _ in test_set_df.columns]
-        return test_set_df.set_index('user_id')
+        return self._folds[fold]['test']
+        # if limit:
+        #     print('WARNING : LIMITING TEST EVENTS TO {} EVENTS ONLY'.format(limit))
+        # # get held-out split
+        # test_set_events = self._folds[fold] if not limit else self._folds[fold].head(limit)
+        # # get tracks listened by user
+        # test_set = (test_set_events[['user_id', 'track_id']]
+        #             .groupby(by=['user_id'])['track_id']
+        #             .apply(set)
+        #             .apply(list))
+        # # save index
+        # test_set_index = test_set.index.to_numpy()
+        # # convert to list of list
+        # test_set = test_set.tolist()
+        # # convert to pd.DataFrame; columns are tracks
+        # test_set_df = pd.DataFrame(test_set).fillna(value=-1).astype(np.int64)
+        # # set index to original index
+        # test_set_df['user_id'] = test_set_index
+        # test_set_df.columns = [str(_) for _ in test_set_df.columns]
+        # return test_set_df.set_index('user_id')
 
     def _test_model(self, model, fold: int, limit: int = None, custom_RecList: RecList = None) -> str:
         # use default RecList if not specified
         myRecList = custom_RecList if custom_RecList else EvalRSRecList
 
         test_set_df = self._get_test_set(fold=fold, limit=limit)
-        x_test = test_set_df.reset_index()[['user_id']]
-        y_test = test_set_df
+        x_test = test_set_df[['user_id']]
+        y_test = test_set_df.set_index('user_id')
 
         dataset = EvalRSDataset()
         dataset.load(x_test=x_test,
