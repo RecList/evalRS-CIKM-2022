@@ -20,16 +20,13 @@ During the _leaderboard phase_, you can submit your scores to the leaderboard ru
 
 ### Build your own evaluation loop
 
-To make a new submission to the leaderboard you are just required to build two new objects:
+To make a new submission to the leaderboard you are just required to build one new object, a model class containing a `train` and `predict` methods, such as the one contained in the `submission` folder.
 
-* an implementation of `EvalRSRunner` containing your training logic;
-* a model object built inside the `train_model` method of your custom runner.
+First, you should inherit `RecModel` and implement the `train` method: `train` should contain the model training code, _including any necessary hyper-parameter optimization_; if you wish to pass additional parameters to the training function, you can specify them after the training dataframe. You are free to use any modelling technique you want (collaborative filtering, two-tower etc.) as long as your code complies with the Data Challenge rules (no test leaking, hyperparameter and compute time within the budget etc.).
 
-First, you should inherit `EvalRSRunner` and implement the abstract method `train_model`: `train_model` should contain the model training code, _including any necessary hyper-parameter optimization_. By inheriting `EvalRSRunner`, you get access to necessary meta-data via `self.df_tracks` and `self.df_users`: you are free to use any modelling technique you want (collaborative filtering, two-tower etc.) as long as your code complies with the Data Challenge rules (no test leaking, hyperparameter and compute time within the budget etc.).
+Second, when the training is done, you should wrap your predictions in a method `predict`: `train` should store the trained model inside the class, and `predict` will use that model to provide predictions. The `predict` method accepts as input a dataframe of all the user IDs for which the model is asked to make a prediction on.
 
-Second, when the training is done, you should wrap your model in an object with a method `predict`: `train_model` should return this object as a result of training, since this is what the evaluation loop will use to get predictions and score them. The `predict` method accepts as input a dataframe of all the user IDs for which the model is asked to make a prediction on.
-
-For each `user_id`, we expect `k` predictions (where `k=20`): you can play around with different Ks for debugging purposes _but_ only `k=20` will be accepted for the leaderboard. [The expected prediction output is a dataframe](../images/prediction.jpg) with `user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank). In addition, it is expected that the predictions are in the same order as the `user_id` in the input dataframe. An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, 
+For each `user_id`, we expect `k` predictions (where `k=20` for the competition): you can play around with different Ks for debugging purposes _but_ only `k=20` will be accepted for the leaderboard. [The expected prediction output is a dataframe](../images/prediction.jpg) with `user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank). In addition, it is expected that the predictions are in the same order as the `user_id` in the input dataframe. An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, 
 the empty columns should be filled with `-1`. 
 
  |           |  0          | ...        | k-1         | 
@@ -44,41 +41,44 @@ _Implementing the class, and returning the trained model in the proper wrapper:_
 
 ```python
 
-class MyEvalRSRunner(EvalRSRunner):
-
-    def train_model(self, train_df: pd.DataFrame, **kwargs):
-        """
-        Inherit from the Challenge class EvalRSRunner, and implement your training logic
-        in this function. Return a trained model.
-        """
-        # do your magic here
-        model.train(train_df)
-        # store your model into a model object - see below
-        my_model = MyModel(model, top_k=20)
-        # return the trained model in the proper wrapper
-        return my_model
-```
-
-_Example of a model wrapper implementing the predict method_
-
-```python
-
 class MyModel(RecModel):
+    
+    def __init__(self, items: pd.DataFrame, top_k: int=20):
+        super(MyModel, self).__init__()
+        self.top_k = top_k
+        self.items = items
 
-    def __init__(self, model, top_k=20):
-       # implement your init logic here
-       self._model = model
-       self.top_k = top_k
+    def train(self, train_df: pd.DataFrame, **kwargs):
+        """
+        Implement here your training logic. Since our example method is a simple random model,
+        we actually don't use any training data to build the model, but you should ;-)
+
+        At the end of training, make sure the class contains a trained model you can use in the predict method.
+        """
+        # kwargs may contain additional arguments in case, for example, you
+        # have data augmentation strategies
+        print("Received additional arguments: {}".format(kwargs))
+        print(train_df.head(1))
+        print("Training completed!")
+        return 
 
     def predict(self, user_ids: pd.DataFrame) -> pd.DataFrame:
         """
-        Implement your logic here: given the user Ids in the test set, recommend the top-k songs for them.
+        
+        This function takes as input all the users that we want to predict the top-k items for, and 
+        returns all the predicted songs.
+
+        While in this example is just a random generator, the same logic in your implementation 
+        would allow for batch predictions of all the target data points.
+        
         """
         k = self.top_k
-        # do your magic here
-        pred = self._model.predict(user_ids, k)
-        
-        return pd.DataFrame(pred, columns=['user_id', *[ str(i) for i in range(k)]]).set_index('user_id')
+        num_users = len(user_ids)
+        pred = self.items.sample(n=k*num_users, replace=True).index.values
+        pred = pred.reshape(num_users, k)
+        pred = np.concatenate((user_ids[['user_id']].values, pred), axis=1)
+        return pd.DataFrame(pred, columns=['user_id', *[str(i) for i in range(k)]]).set_index('user_id')
+
 
 ```
 

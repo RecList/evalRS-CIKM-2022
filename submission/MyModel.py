@@ -3,26 +3,26 @@ import pandas as pd
 from reclist.abstractions import RecModel
 
 
-class RandomModel(RecModel):
+class MyModel(RecModel):
     
     def __init__(self, items: pd.DataFrame, top_k: int=20):
-        super(RandomModel, self).__init__()
-        self.items = items
+        super(MyModel, self).__init__()
         self.top_k = top_k
+        self.items = items
 
     def train(self, train_df: pd.DataFrame, **kwargs):
         """
         Implement here your training logic. Since our example method is a simple random model,
         we actually don't use any training data to build the model, but you should ;-)
 
-        At the end of training, you should return a model class that implements the `predict` method,
-        as RandomModel does.
+        At the end of training, make sure the class contains a trained model you can use in the predict method.
         """
         # kwargs may contain additional arguments in case, for example, you
         # have data augmentation strategies
         print("Received additional arguments: {}".format(kwargs))
-
         print(train_df.head(1))
+        print("Training completed!")
+        return 
 
     def predict(self, user_ids: pd.DataFrame) -> pd.DataFrame:
         """

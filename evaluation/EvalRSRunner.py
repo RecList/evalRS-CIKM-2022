@@ -10,11 +10,9 @@
 import os
 import inspect
 import hashlib
-from abc import ABC, abstractmethod
 import pandas as pd
 import time
 import numpy as np
-from typing import List
 import json
 from reclist.abstractions import RecList
 from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
@@ -25,7 +23,7 @@ from evaluation.utils import download_with_progress, get_cache_directory, LFM_DA
 
 class ChallengeDataset:
 
-    def __init__(self, num_folds=4, seed: int = 1, force_download: bool = False):
+    def __init__(self, num_folds=4, seed: int = None, force_download: bool = False):
         # download dataset
         self.path_to_dataset = os.path.join(get_cache_directory(), 'evalrs_dataset')
         if not os.path.exists(self.path_to_dataset) or force_download:
@@ -142,18 +140,20 @@ class EvalRSRunner:
             self,
             model,
             seed: int = None,
-            upload: bool = False,
+            upload: bool = True,
             limit: int = 0,
             top_k: int = 20,
             custom_RecList: RecList = None,
             debug=True,
-            **kwargs
+            # these are additional arguments for training the model, if you need
+            # to pass additional stuff
+            **kwargs 
     ):
 
         print("Generating data folds.")
 
         self._random_state = int(time.time()) if not seed else seed
-        self.model = model()
+        self.model = model
 
         self._events_hash = self.dataset._events_hash
         self._users_hash = self.dataset._users_hash
