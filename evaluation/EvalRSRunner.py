@@ -19,11 +19,13 @@ import json
 from reclist.abstractions import RecList
 from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
 from collections import defaultdict
-from evaluation.utils import download_with_progress, get_cache_directory, LFM_DATASET_PATH, decompress_zipfile, upload_submission
+from evaluation.utils import download_with_progress, get_cache_directory, LFM_DATASET_PATH, decompress_zipfile, \
+    upload_submission
+
 
 class ChallengeDataset:
 
-    def __init__(self, force_download: bool = False):
+    def __init__(self, force_download: bool = False, num_folds=4):
         # download dataset
         self.path_to_dataset = os.path.join(get_cache_directory(), 'evalrs_dataset')
         if not os.path.exists(self.path_to_dataset) or force_download:
@@ -60,8 +62,11 @@ class ChallengeDataset:
                                     })
 
         print("Generating dataset hashes.")
+
+        self._test_set = self._generate_folds(num_folds, self._random_state)
+
         self._events_hash = hashlib.sha256(pd.util.hash_pandas_object(self.df_events.sample(n=1000,
-                                                                                             random_state=0)).values
+                                                                                            random_state=0)).values
                                            ).hexdigest()
         self._tracks_hash = hashlib.sha256(pd.util.hash_pandas_object
                                            (self.df_tracks.sample(n=1000, random_state=0)
@@ -71,12 +76,31 @@ class ChallengeDataset:
                                                                                           random_state=0)).values
                                           ).hexdigest()
 
+    def _generate_folds(self, num_folds: int, seed: int) -> pd.DataFrame:
+        df_groupby = self.df_events.groupby(by='user_id', as_index=False)
+        df_test = df_groupby.sample(n=num_folds, replace=True, random_state=seed)[['user_id', 'track_id']]
+        df_test['ones'] = 1
+        df_test['fold'] = df_test.groupby('user_id', as_index=False)['ones'].cumsum().values - 1
+        df_test = df_test.drop('ones', axis=1)
+        return df_test
+
+    def _get_train_set(self, fold: int) -> pd.DataFrame:
+        assert fold <= self._test_set['fold'].max()
+        test_index = self._test_set[self._test_set['fold'] == fold].index
+        return self.df_events.loc[test_index]
+
+    def _get_test_set(self, fold: int, limit: int = None) -> pd.DataFrame:
+        assert fold <= self._test_set['fold'].max()
+        return self._test_set[self._test_set['fold'] == fold][['user_id', 'track_id']]
+
+    def get_sample_train_test(self):
+        return self._get_train_set(1), self._get_test_set(1)
 
 
 class EvalRSRunner(ABC):
 
     def __init__(self,
-
+                 dataset: ChallengeDataset,
                  email: str = None,
                  participant_id: str = None,
                  aws_access_key_id: str = None,
@@ -88,99 +112,50 @@ class EvalRSRunner(ABC):
         self.aws_secret_access_key = aws_secret_access_key
         self.bucket_name = bucket_name
         self._num_folds = None
-        self._random_state =  None
-        self._folds =  None
+        self._random_state = None
+        self._folds = None
         self.model = None
-        self.df_users = None
-        self.df_tracks = None
-        self.df_events = None
-
-
-    def _generate_folds(self, num_folds: int, seed: int) -> List[dict]:
-        folds = []
-        df_groupby = self.df_events.groupby(by='user_id', as_index=False)
-        for i in range(num_folds):
-            print("Generating Fold {}/{}".format(i+1, num_folds))
-            df_test = df_groupby.sample(n=1, replace=True, random_state=seed+i)[['user_id','track_id']]
-            df_train = self.df_events.drop(df_test.index)
-            folds.append({
-                'train': df_train,
-                'test': df_test
-            })
-        # del self._df_events
-        return folds
-
-    def _get_train_set(self, fold: int) -> pd.DataFrame:
-        assert fold < len(self._folds)
-        return self._folds[fold]['train']
-        # return pd.concat([self._folds[idx] for idx in range(len(self._folds)) if idx != fold])
-
-
-    def _get_test_set(self, fold: int, limit: int = None) -> pd.DataFrame:
-        return self._folds[fold]['test']
-        # if limit:
-        #     print('WARNING : LIMITING TEST EVENTS TO {} EVENTS ONLY'.format(limit))
-        # # get held-out split
-        # test_set_events = self._folds[fold] if not limit else self._folds[fold].head(limit)
-        # # get tracks listened by user
-        # test_set = (test_set_events[['user_id', 'track_id']]
-        #             .groupby(by=['user_id'])['track_id']
-        #             .apply(set)
-        #             .apply(list))
-        # # save index
-        # test_set_index = test_set.index.to_numpy()
-        # # convert to list of list
-        # test_set = test_set.tolist()
-        # # convert to pd.DataFrame; columns are tracks
-        # test_set_df = pd.DataFrame(test_set).fillna(value=-1).astype(np.int64)
-        # # set index to original index
-        # test_set_df['user_id'] = test_set_index
-        # test_set_df.columns = [str(_) for _ in test_set_df.columns]
-        # return test_set_df.set_index('user_id')
+        self.dataset = dataset
 
     def _test_model(self, model, fold: int, limit: int = None, custom_RecList: RecList = None) -> str:
         # use default RecList if not specified
         myRecList = custom_RecList if custom_RecList else EvalRSRecList
 
-        test_set_df = self._get_test_set(fold=fold, limit=limit)
+        test_set_df = self.dataset._get_test_set(fold=fold, limit=limit)
         x_test = test_set_df[['user_id']]
         y_test = test_set_df.set_index('user_id')
 
         dataset = EvalRSDataset()
         dataset.load(x_test=x_test,
                      y_test=y_test,
-                     users=self.df_users,
-                     items=self.df_tracks)
+                     users=self.dataset.df_users,
+                     items=self.dataset.df_tracks)
 
         rlist = myRecList(model=model, dataset=dataset)
         report_path = rlist()
         return report_path
 
     def evaluate(
-        self,
-        model, challenge_dataset: ChallengeDataset, num_folds: int = 4, seed: int = None,
-        upload: bool = False,
-        limit: int = 0,  
-        top_k: int = 20, 
-        custom_RecList: RecList = None, 
-        debug=True,
-        **kwargs
+            self,
+            model,
+            num_folds: int = 4, seed: int = None,
+            upload: bool = False,
+            limit: int = 0,
+            top_k: int = 20,
+            custom_RecList: RecList = None,
+            debug=True,
+            **kwargs
     ):
 
         print("Generating data folds.")
 
         self._num_folds = num_folds
         self._random_state = int(time.time()) if not seed else seed
-        self._folds = self._generate_folds(self._num_folds, self._random_state)
         self.model = model
 
-        self.df_users = challenge_dataset.df_users
-        self.df_tracks = challenge_dataset.df_tracks
-        self.df_events = challenge_dataset.df_events
-
-        self._events_hash = challenge_dataset._events_hash
-        self._users_hash = challenge_dataset._users_hash
-        self._tracks_hash = challenge_dataset._tracks_hash
+        self._events_hash = self.dataset._events_hash
+        self._users_hash = self.dataset._users_hash
+        self._tracks_hash = self.dataset._tracks_hash
 
         num_folds = len(self._folds)
         if num_folds != 4 or top_k != 20 or limit != 0:
@@ -193,15 +168,15 @@ class EvalRSRunner(ABC):
             assert self.aws_access_key_id
             assert self.aws_secret_access_key
             assert self.bucket_name
-        
+
         fold_results_path = []
         for fold in range(num_folds):
-            train_df = self._get_train_set(fold=fold)
+            train_df = self.dataset._get_train_set(fold=fold)
             if debug:
-                print('\nPerforming Training for fold {}/{}...'.format(fold+1, num_folds))
+                print('\nPerforming Training for fold {}/{}...'.format(fold + 1, num_folds))
             self.model.train(train_df, **kwargs)
             if debug:
-                print('Performing Evaluation for fold {}/{}...'.format(fold+1, num_folds))
+                print('Performing Evaluation for fold {}/{}...'.format(fold + 1, num_folds))
             results_path = self._test_model(self.model, fold, limit=limit, custom_RecList=custom_RecList)
 
             fold_results_path.append(results_path)
@@ -230,7 +205,7 @@ class EvalRSRunner(ABC):
             'hash': hash(self)
         }
         # TODO: dump data somewhere better?
-        local_file = '{}_{}.json'.format(self.email.replace('@', '_'), int(time.time()*10000))
+        local_file = '{}_{}.json'.format(self.email.replace('@', '_'), int(time.time() * 10000))
         with open(local_file, 'w') as outfile:
             json.dump(out_dict, outfile, indent=2)
         print('SUBMISSION RESULTS SAVE TO {}'.format(local_file))
@@ -249,13 +224,13 @@ class EvalRSRunner(ABC):
             self._tracks_hash,
             inspect.getsource(self.evaluate).lstrip(' ').rstrip(' '),
             inspect.getsource(self._test_model).lstrip(' ').rstrip(' '),
-            inspect.getsource(self._get_test_set).lstrip(' ').rstrip(' '),
-            inspect.getsource(self._get_train_set).lstrip(' ').rstrip(' '),
-            inspect.getsource(self._generate_folds).lstrip(' ').rstrip(' '),
+            inspect.getsource(self.dataset._get_test_set).lstrip(' ').rstrip(' '),
+            inspect.getsource(self.dataset._get_train_set).lstrip(' ').rstrip(' '),
+            inspect.getsource(self.dataset._generate_folds).lstrip(' ').rstrip(' '),
             inspect.getsource(self.__init__).lstrip(' ').rstrip(' '),
             inspect.getsource(self.__hash__).lstrip(' ').rstrip(' '),
         ]
-        hash_input = '_'.join([ str(_) for _ in  hash_inputs])
+        hash_input = '_'.join([str(_) for _ in hash_inputs])
         return int(hashlib.sha256(hash_input.encode()).hexdigest(), 16)
 
     @abstractmethod
