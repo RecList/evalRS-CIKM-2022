@@ -51,7 +51,8 @@ class ChallengeDataset:
                                      dtype={
                                          'track_id': 'int32',
                                          'artist_id': 'int32'
-                                     })
+                                     }).set_index('user_id')
+
         self.df_users = pd.read_csv(self.path_to_users,
                                     dtype={
                                         'user_id': 'int32',
@@ -59,7 +60,7 @@ class ChallengeDataset:
                                         'country_id': 'int32',
                                         'timestamp': 'int32',
                                         'age': 'int32',
-                                    })
+                                    }).set_index('user_id')
 
         print("Generating folds.")
         self.num_folds = num_folds
@@ -88,8 +89,8 @@ class ChallengeDataset:
 
     def _get_train_set(self, fold: int) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
-        test_index = self._test_set[self._test_set['fold'] == fold].index
-        return self.df_events.loc[test_index]
+        test_index = self._test_set[self._test_set['fold']==fold].index
+        return self.df_events.loc[self.df_events.index.difference(test_index)]
 
     def _get_test_set(self, fold: int, limit: int = None) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
@@ -151,7 +152,6 @@ class EvalRSRunner:
 
         print("Generating data folds.")
 
-        self._num_folds = self.dataset.num_folds
         self._random_state = int(time.time()) if not seed else seed
         self.model = model()
 
@@ -159,7 +159,7 @@ class EvalRSRunner:
         self._users_hash = self.dataset._users_hash
         self._tracks_hash = self.dataset._tracks_hash
 
-        num_folds = self.dataset.num_folds
+        num_folds = self.dataset._test_set['fold'].max() + 1
 
         if num_folds != 4 or top_k != 20 or limit != 0:
             print("\nWARNING: default values are not used - upload is disabled")
