@@ -62,8 +62,10 @@ class ChallengeDataset:
                                     })
 
         print("Generating folds.")
+        self.num_folds = num_folds
         self._random_state = int(time.time()) if not seed else seed
-        self._test_set = self._generate_folds(num_folds, self._random_state)
+        self._test_set = self._generate_folds(self.num_folds, self._random_state)
+
         print("Generating dataset hashes.")
         self._events_hash = hashlib.sha256(pd.util.hash_pandas_object(self.df_events.sample(n=1000,
                                                                                             random_state=0)).values
@@ -97,7 +99,7 @@ class ChallengeDataset:
         return self._get_train_set(1), self._get_test_set(1)
 
 
-class EvalRSRunner(ABC):
+class EvalRSRunner:
 
     def __init__(self,
                  dataset: ChallengeDataset,
@@ -138,7 +140,7 @@ class EvalRSRunner(ABC):
     def evaluate(
             self,
             model,
-            num_folds: int = 4, seed: int = None,
+            seed: int = None,
             upload: bool = False,
             limit: int = 0,
             top_k: int = 20,
@@ -149,7 +151,7 @@ class EvalRSRunner(ABC):
 
         print("Generating data folds.")
 
-        self._num_folds = num_folds
+        self._num_folds = self.dataset.num_folds
         self._random_state = int(time.time()) if not seed else seed
         self.model = model()
 
@@ -157,7 +159,8 @@ class EvalRSRunner(ABC):
         self._users_hash = self.dataset._users_hash
         self._tracks_hash = self.dataset._tracks_hash
 
-        num_folds = num_folds
+        num_folds = self.dataset.num_folds
+
         if num_folds != 4 or top_k != 20 or limit != 0:
             print("\nWARNING: default values are not used - upload is disabled")
             upload = False
@@ -233,6 +236,3 @@ class EvalRSRunner(ABC):
         hash_input = '_'.join([str(_) for _ in hash_inputs])
         return int(hashlib.sha256(hash_input.encode()).hexdigest(), 16)
 
-    @abstractmethod
-    def train_model(self, train_df: pd.DataFrame, **kwargs):
-        raise NotImplementedError
