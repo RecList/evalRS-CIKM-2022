@@ -91,30 +91,26 @@ class EvalRSRunner(ABC):
         self._random_state = int(time.time()) if not seed else seed
         self._num_folds = num_folds
         print("Generating data folds.")
-        self._folds = self._generate_folds(num_folds, self._random_state)
+        self._test_set = self._generate_folds(num_folds, self._random_state)
 
-    def _generate_folds(self, num_folds: int, seed: int) -> List[dict]:
-        folds = []
+    def _generate_folds(self, num_folds: int, seed: int) -> pd.DataFrame:
         df_groupby = self._df_events.groupby(by='user_id', as_index=False)
-        for i in range(num_folds):
-            print("Generating Fold {}/{}".format(i+1, num_folds))
-            df_test = df_groupby.sample(n=1, replace=True, random_state=seed+i)[['user_id','track_id']]
-            df_train = self._df_events.drop(df_test.index)
-            folds.append({
-                'train': df_train,
-                'test': df_test
-            })
-        # del self._df_events
-        return folds
+        df_test = df_groupby.sample(n=num_folds, replace=True, random_state=seed)[['user_id', 'track_id']]
+        df_test['ones'] = 1
+        df_test['fold'] = df_test.groupby('user_id', as_index=False)['ones'].cumsum().values-1
+        df_test = df_test.drop('ones', axis=1)
+        return df_test
 
     def _get_train_set(self, fold: int) -> pd.DataFrame:
-        assert fold < len(self._folds)
-        return self._folds[fold]['train']
-        # return pd.concat([self._folds[idx] for idx in range(len(self._folds)) if idx != fold])
+        assert fold <= self._test_set['fold'].max()
+        test_index = self._test_set[self._test_set['fold']==fold].index
+        # return self._df_events.drop(test_index)
+        return self._df_events.loc[test_index]
 
 
     def _get_test_set(self, fold: int, limit: int = None) -> pd.DataFrame:
-        return self._folds[fold]['test']
+        assert fold <= self._test_set['fold'].max()
+        return self._test_set[self._test_set['fold'] == fold][['user_id', 'track_id']]
         # if limit:
         #     print('WARNING : LIMITING TEST EVENTS TO {} EVENTS ONLY'.format(limit))
         # # get held-out split
@@ -162,7 +158,7 @@ class EvalRSRunner(ABC):
         debug=True,
         **kwargs
     ):
-        num_folds = len(self._folds)
+        num_folds = self._test_set['fold'].max() + 1
         if num_folds != 4 or top_k != 20 or limit != 0:
             print("\nWARNING: default values are not used - upload is disabled")
             upload = False
