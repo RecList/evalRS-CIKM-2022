@@ -15,7 +15,6 @@ from abc import ABC, abstractmethod
 import pandas as pd
 import time
 import numpy as np
-from typing import List
 import json
 from reclist.abstractions import RecList
 from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
@@ -104,7 +103,6 @@ class EvalRSRunner(ABC):
     def _get_train_set(self, fold: int) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
         test_index = self._test_set[self._test_set['fold']==fold].index
-        # return self._df_events.drop(test_index)
         return self._df_events.loc[test_index]
 
 
@@ -113,23 +111,7 @@ class EvalRSRunner(ABC):
         return self._test_set[self._test_set['fold'] == fold][['user_id', 'track_id']]
         # if limit:
         #     print('WARNING : LIMITING TEST EVENTS TO {} EVENTS ONLY'.format(limit))
-        # # get held-out split
-        # test_set_events = self._folds[fold] if not limit else self._folds[fold].head(limit)
-        # # get tracks listened by user
-        # test_set = (test_set_events[['user_id', 'track_id']]
-        #             .groupby(by=['user_id'])['track_id']
-        #             .apply(set)
-        #             .apply(list))
-        # # save index
-        # test_set_index = test_set.index.to_numpy()
-        # # convert to list of list
-        # test_set = test_set.tolist()
-        # # convert to pd.DataFrame; columns are tracks
-        # test_set_df = pd.DataFrame(test_set).fillna(value=-1).astype(np.int64)
-        # # set index to original index
-        # test_set_df['user_id'] = test_set_index
-        # test_set_df.columns = [str(_) for _ in test_set_df.columns]
-        # return test_set_df.set_index('user_id')
+
 
     def _test_model(self, model, fold: int, limit: int = None, custom_RecList: RecList = None) -> str:
         # use default RecList if not specified
