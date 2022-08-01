@@ -49,7 +49,7 @@ class ChallengeDataset:
                                      dtype={
                                          'track_id': 'int32',
                                          'artist_id': 'int32'
-                                     }).set_index('user_id')
+                                     }).set_index('track_id')
 
         self.df_users = pd.read_csv(self.path_to_users,
                                     dtype={
@@ -118,7 +118,7 @@ class EvalRSRunner:
         self.model = None
         self.dataset = dataset
 
-    def _test_model(self, model, fold: int, limit: int = None, top_k: int = 20, custom_RecList: RecList = None) -> str:
+    def _test_model(self, model, fold: int, limit: int = None, custom_RecList: RecList = None) -> str:
         # use default RecList if not specified
         myRecList = custom_RecList if custom_RecList else EvalRSRecList
 
@@ -131,7 +131,7 @@ class EvalRSRunner:
                      y_test=y_test,
                      users=self.dataset.df_users,
                      items=self.dataset.df_tracks)
-        # TODO: we should verify the shape of predictions respects top_k
+        # TODO: we should verify the shape of predictions respects top_k=20
         rlist = myRecList(model=model, dataset=dataset)
         report_path = rlist()
         return report_path
@@ -142,7 +142,6 @@ class EvalRSRunner:
             seed: int = None,
             upload: bool = True,
             limit: int = 0,
-            top_k: int = 20,
             custom_RecList: RecList = None,
             debug=True,
             # these are additional arguments for training the model, if you need
@@ -161,7 +160,7 @@ class EvalRSRunner:
 
         num_folds = self.dataset._test_set['fold'].max() + 1
 
-        if num_folds != 4 or top_k != 20 or limit != 0:
+        if num_folds != 4 or limit != 0:
             print("\nWARNING: default values are not used - upload is disabled")
             upload = False
         # if upload, check we have the necessary credentials
@@ -180,7 +179,7 @@ class EvalRSRunner:
             self.model.train(train_df, **kwargs)
             if debug:
                 print('Performing Evaluation for fold {}/{}...'.format(fold + 1, num_folds))
-            results_path = self._test_model(self.model, fold, limit=limit, top_k=top_k, custom_RecList=custom_RecList)
+            results_path = self._test_model(self.model, fold, limit=limit, custom_RecList=custom_RecList)
 
             fold_results_path.append(results_path)
 
