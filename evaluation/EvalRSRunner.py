@@ -38,14 +38,13 @@ class ChallengeDataset:
         self.path_to_tracks = os.path.join(self.path_to_dataset, 'evalrs_tracks.csv')
         self.path_to_users = os.path.join(self.path_to_dataset, 'evalrs_users.csv')
 
-
         assert os.path.exists(self.path_to_events)
         assert os.path.exists(self.path_to_tracks)
         assert os.path.exists(self.path_to_users)
 
         print("Loading dataset.")
         # TODO: Verfiy dtype do not cause overflow
-        self._df_events = pd.read_csv(self.path_to_events, index_col=0, dtype='int32')
+        self.df_events = pd.read_csv(self.path_to_events, index_col=0, dtype='int32')
         self.df_tracks = pd.read_csv(self.path_to_tracks,
                                      dtype={
                                          'track_id': 'int32',
@@ -61,7 +60,7 @@ class ChallengeDataset:
                                     })
 
         print("Generating dataset hashes.")
-        self._events_hash = hashlib.sha256(pd.util.hash_pandas_object(self._df_events.sample(n=1000,
+        self._events_hash = hashlib.sha256(pd.util.hash_pandas_object(self.df_events.sample(n=1000,
                                                                                              random_state=0)).values
                                            ).hexdigest()
         self._tracks_hash = hashlib.sha256(pd.util.hash_pandas_object
@@ -92,17 +91,18 @@ class EvalRSRunner(ABC):
         self._random_state =  None
         self._folds =  None
         self.model = None
-        self.challenge_dataset = None
-
+        self.df_users = None
+        self.df_tracks = None
+        self.df_events = None
 
 
     def _generate_folds(self, num_folds: int, seed: int) -> List[dict]:
         folds = []
-        df_groupby = self.challenge_dataset._df_events.groupby(by='user_id', as_index=False)
+        df_groupby = self.df_events.groupby(by='user_id', as_index=False)
         for i in range(num_folds):
             print("Generating Fold {}/{}".format(i+1, num_folds))
             df_test = df_groupby.sample(n=1, replace=True, random_state=seed+i)[['user_id','track_id']]
-            df_train = self.challenge_dataset._df_events.drop(df_test.index)
+            df_train = self.df_events.drop(df_test.index)
             folds.append({
                 'train': df_train,
                 'test': df_test
@@ -149,8 +149,8 @@ class EvalRSRunner(ABC):
         dataset = EvalRSDataset()
         dataset.load(x_test=x_test,
                      y_test=y_test,
-                     users=self.challenge_dataset.df_users,
-                     items=self.challenge_dataset.df_tracks)
+                     users=self.df_users,
+                     items=self.df_tracks)
 
         rlist = myRecList(model=model, dataset=dataset)
         report_path = rlist()
@@ -158,7 +158,7 @@ class EvalRSRunner(ABC):
 
     def evaluate(
         self,
-        model, challenge_dataset: ChallengeDataset, seed: int = None, num_folds: int = 4,
+        model, challenge_dataset: ChallengeDataset, num_folds: int = 4, seed: int = None,
         upload: bool = False,
         limit: int = 0,  
         top_k: int = 20, 
@@ -173,7 +173,14 @@ class EvalRSRunner(ABC):
         self._random_state = int(time.time()) if not seed else seed
         self._folds = self._generate_folds(self._num_folds, self._random_state)
         self.model = model
-        self.challenge_dataset = challenge_dataset
+
+        self.df_users = challenge_dataset.df_users
+        self.df_tracks = challenge_dataset.df_tracks
+        self.df_events = challenge_dataset.df_events
+
+        self._events_hash = challenge_dataset._events_hash
+        self._users_hash = challenge_dataset._users_hash
+        self._tracks_hash = challenge_dataset._tracks_hash
 
         num_folds = len(self._folds)
         if num_folds != 4 or top_k != 20 or limit != 0:
@@ -192,10 +199,10 @@ class EvalRSRunner(ABC):
             train_df = self._get_train_set(fold=fold)
             if debug:
                 print('\nPerforming Training for fold {}/{}...'.format(fold+1, num_folds))
-            model = self.train_model(train_df, **kwargs)
+            self.model.train(train_df, **kwargs)
             if debug:
                 print('Performing Evaluation for fold {}/{}...'.format(fold+1, num_folds))
-            results_path = self._test_model(model, fold, limit=limit, custom_RecList=custom_RecList)
+            results_path = self._test_model(self.model, fold, limit=limit, custom_RecList=custom_RecList)
 
             fold_results_path.append(results_path)
 
@@ -237,9 +244,9 @@ class EvalRSRunner(ABC):
     def __hash__(self):
         hash_inputs = [
             self._num_folds,
-            self.challenge_dataset._events_hash,
-            self.challenge_dataset._users_hash,
-            self.challenge_dataset._tracks_hash,
+            self._events_hash,
+            self._users_hash,
+            self._tracks_hash,
             inspect.getsource(self.evaluate).lstrip(' ').rstrip(' '),
             inspect.getsource(self._test_model).lstrip(' ').rstrip(' '),
             inspect.getsource(self._get_test_set).lstrip(' ').rstrip(' '),

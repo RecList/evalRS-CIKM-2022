@@ -10,6 +10,20 @@ class RandomModel(RecModel):
         self.items = items
         self.top_k = top_k
 
+    def train(self, train_df: pd.DataFrame, **kwargs):
+        """
+        Implement here your training logic. Since our example method is a simple random model,
+        we actually don't use any training data to build the model, but you should ;-)
+
+        At the end of training, you should return a model class that implements the `predict` method,
+        as RandomModel does.
+        """
+        # kwargs may contain additional arguments in case, for example, you
+        # have data augmentation strategies
+        print("Received additional arguments: {}".format(kwargs))
+
+        print(train_df.head(1))
+
     def predict(self, user_ids: pd.DataFrame) -> pd.DataFrame:
         """
         
