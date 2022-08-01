@@ -157,7 +157,7 @@ class EvalRSRunner(ABC):
         self._users_hash = self.dataset._users_hash
         self._tracks_hash = self.dataset._tracks_hash
 
-        num_folds = len(self._folds)
+        num_folds = num_folds
         if num_folds != 4 or top_k != 20 or limit != 0:
             print("\nWARNING: default values are not used - upload is disabled")
             upload = False
