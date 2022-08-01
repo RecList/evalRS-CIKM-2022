@@ -25,7 +25,7 @@ from evaluation.utils import download_with_progress, get_cache_directory, LFM_DA
 
 class ChallengeDataset:
 
-    def __init__(self, force_download: bool = False, num_folds=4):
+    def __init__(self, num_folds=4, seed: int = 1, force_download: bool = False):
         # download dataset
         self.path_to_dataset = os.path.join(get_cache_directory(), 'evalrs_dataset')
         if not os.path.exists(self.path_to_dataset) or force_download:
@@ -61,10 +61,10 @@ class ChallengeDataset:
                                         'age': 'int32',
                                     })
 
-        print("Generating dataset hashes.")
-
+        print("Generating folds.")
+        self._random_state = int(time.time()) if not seed else seed
         self._test_set = self._generate_folds(num_folds, self._random_state)
-
+        print("Generating dataset hashes.")
         self._events_hash = hashlib.sha256(pd.util.hash_pandas_object(self.df_events.sample(n=1000,
                                                                                             random_state=0)).values
                                            ).hexdigest()
