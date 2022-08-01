@@ -1,10 +1,10 @@
 """
 
-    This is the abstract class containing the common methods for the evaluation of your model.
-    Your own submission will implement an instance of EvalRSRunner, containing your trainining logic,
-    and the reference to your model object (i.e. a Python class exposing a `predict_all` method).
+    This is the class containing the common methods for the evaluation of your model.
+    Your own submission should NOT modify this script, but only provide your own model when running the
+    evaluation.
 
-    You should NOT modify this script.
+    Please refer to the README for more details and check submission.py for a sample implementation.
 
 """
 import os
@@ -118,7 +118,7 @@ class EvalRSRunner:
         self.model = None
         self.dataset = dataset
 
-    def _test_model(self, model, fold: int, limit: int = None, custom_RecList: RecList = None) -> str:
+    def _test_model(self, model, fold: int, limit: int = None, top_k: int = 20, custom_RecList: RecList = None) -> str:
         # use default RecList if not specified
         myRecList = custom_RecList if custom_RecList else EvalRSRecList
 
@@ -131,7 +131,7 @@ class EvalRSRunner:
                      y_test=y_test,
                      users=self.dataset.df_users,
                      items=self.dataset.df_tracks)
-
+        # TODO: we should verify the shape of predictions respects top_k
         rlist = myRecList(model=model, dataset=dataset)
         report_path = rlist()
         return report_path
@@ -180,7 +180,7 @@ class EvalRSRunner:
             self.model.train(train_df, **kwargs)
             if debug:
                 print('Performing Evaluation for fold {}/{}...'.format(fold + 1, num_folds))
-            results_path = self._test_model(self.model, fold, limit=limit, custom_RecList=custom_RecList)
+            results_path = self._test_model(self.model, fold, limit=limit, top_k=top_k, custom_RecList=custom_RecList)
 
             fold_results_path.append(results_path)
 

@@ -5,21 +5,22 @@ from reclist.abstractions import RecModel
 
 class MyModel(RecModel):
     
-    def __init__(self, items: pd.DataFrame, top_k: int=20):
+    def __init__(self, items: pd.DataFrame, top_k: int=20, **kwargs):
         super(MyModel, self).__init__()
-        self.top_k = top_k
         self.items = items
+        self.top_k = top_k
+        # kwargs may contain additional arguments in case, for example, you
+        # have data augmentation strategies
+        print("Received additional arguments: {}".format(kwargs))
+        return
 
-    def train(self, train_df: pd.DataFrame, **kwargs):
+    def train(self, train_df: pd.DataFrame):
         """
         Implement here your training logic. Since our example method is a simple random model,
         we actually don't use any training data to build the model, but you should ;-)
 
         At the end of training, make sure the class contains a trained model you can use in the predict method.
         """
-        # kwargs may contain additional arguments in case, for example, you
-        # have data augmentation strategies
-        print("Received additional arguments: {}".format(kwargs))
         print(train_df.head(1))
         print("Training completed!")
         return 
