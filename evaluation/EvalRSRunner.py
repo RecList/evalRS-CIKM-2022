@@ -58,12 +58,13 @@ class EvalRSRunner(ABC):
 
         print("Loading dataset.")
         # TODO: Verfiy dtype do not cause overflow
-        self._df_events = pd.read_csv(self.path_to_events, index_col=0, dtype='int32')
+        self._df_events = pd.read_csv(self.path_to_events, dtype='int32', index_col=0)
+        self._df_events.index = self._df_events.index.astype('int32', copy = False)
         self.df_tracks = pd.read_csv(self.path_to_tracks,
                                      dtype={
                                          'track_id':'int32',
                                          'artist_id':'int32'
-                                     })
+                                     }).set_index('track_id')
         self.df_users = pd.read_csv(self.path_to_users,
                                     dtype={
                                         'user_id': 'int32',
@@ -71,7 +72,7 @@ class EvalRSRunner(ABC):
                                         'country_id': 'int32',
                                         'timestamp': 'int32',
                                         'age': 'int32',
-                                    })
+                                    }).set_index('user_id')
 
 
 
@@ -103,7 +104,7 @@ class EvalRSRunner(ABC):
     def _get_train_set(self, fold: int) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
         test_index = self._test_set[self._test_set['fold']==fold].index
-        return self._df_events.loc[test_index]
+        return self._df_events.loc[self._df_events.index.difference(test_index)]
 
 
     def _get_test_set(self, fold: int, limit: int = None) -> pd.DataFrame:
