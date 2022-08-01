@@ -151,7 +151,7 @@ class EvalRSRunner(ABC):
 
         self._num_folds = num_folds
         self._random_state = int(time.time()) if not seed else seed
-        self.model = model
+        self.model = model()
 
         self._events_hash = self.dataset._events_hash
         self._users_hash = self.dataset._users_hash
