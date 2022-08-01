@@ -47,7 +47,6 @@ _Historical Interactions_: a collection of interactions between users and tracks
 
 ![http://www.cp.jku.at/datasets/LFM-1b/](images/training.png)
 
-
 For in-depth explanations on the code and the template scripts, see the instructions below and check the provided examples and tutorials in `notebooks` and `baselines`.
 
 For information on how the original dataset was built and what meta-data are available, please refer to [this paper](http://www.cp.jku.at/people/schedl/Research/Publications/pdf/schedl_ijmir_2017.pdf).
@@ -73,8 +72,7 @@ pip install -r requirements.txt
 ```
 
 We use dot files to manage secret keys. Copy the `local.env` file and create an 
-`upload.env` (**DO NOT** commit this file). You can fill this file with the keys you got at step 1 plus some global configurations:
-
+`upload.env` (**DO NOT** commit this file). You can fill this file with the keys you got at step 1 (plus some global flags, if you wish to use them in your code - for example an `UPLOAD` flag if you wish to disable upload):
 
 | VARIABLE | TYPE (DEFAULT) | MEANING |
 | ------------- | ------------- | ------------- |
@@ -83,10 +81,6 @@ We use dot files to manage secret keys. Copy the `local.env` file and create an
 | PARTICIPANT_ID | string  | Id from your registration e-mail  |
 | AWS_ACCESS_KEY | string  | AWS access from your registration e-mail  |
 | AWS_SECRET_KEY | string  | AWS key from your registration e-mail  |
-| UPLOAD | 1/0 (1)  | Boolean, 1 to upload your scores to the leaderboard. NOTE: scores are uploaded only if LIMIT, TOP_K, and FOLDS have default values.  |
-| LIMIT | int (0)  | Number of test cases to use (0 = all). Limiting the test set size is useful for quick local debugging and iterations. Only runs with LIMIT=0 are considered for the leaderboard.  |
-| TOP_K | int (20)  | Number of tracks to recommend for each users in the test set. Changing _k_ is useful for quick debugging. Only runs with TOP_K=20 are considered for the leaderboard.  |
-| FOLDS | int (4)  | Number of folds for the evaluation loop (see methodology below). Only runs with FOLDS=4 are considered for the leaderboard. |
 
 Now, run
 
@@ -94,8 +88,8 @@ Now, run
 python submission.py
 ```
 
-This first rul will also download the dataset for you (and it won't download it next). The code
-runs a random model baseline, computes your score and sent them to the leaderboard. 
+This first run will also download the dataset for you (and it won't download it again next again unless you specify `force_download=True` when instantiating the ChallengeDataset class). The code
+runs a random model baseline, computes the score and sent them to the leaderboard. 
 Click [here](https://reclist.io/cikm2022-cup/leaderboard.html) to see the leaderboard! It should look like this:
 
 ![https://reclist.io/cikm2022-cup/leaderboard.html](images/leaderboard.png)
@@ -106,54 +100,57 @@ P.s.: if something in the procedure goes wrong, please contact us through Slack!
 
 ### Third Step: Run your code
 
-A valid submission script can be obtained by copying into your repository `submission.py`, and modify `my_runner.py` and the related model (`RandomModel.py`) to use your logic instead of the default one. In theory, no change should be necessary to `submission.py`. Your submission is required to build an instance of the class `EvalRSRunner`, providing an implementation for the `train_model.py` method.
+A valid submission script can be obtained by copying into your repository `submission.py`, and modify `MyModel.py` to use your logic instead of the default (random) one. In theory, no change should be necessary to `submission.py`. Your submission is required to build an instance of a `RecModel`, providing an implementation for the `train` and `predict` methods.
 
-In the `evaluation` folder, we included a lenghtier explanation of the evaluation methodology involved in this challenge; in the `notebooks` folder, we include a step-by-step, heavily commented guide on how to build a submission, including sample data points and an example of using a derived RecList for evaluation; in the `baselines` folder, you will find more complex models than the simple random one, as an inspiration. Remember: this competition is about models as much as about _data_ and _testing_ - take our initial work just as an inspiration!
+In the `evaluation` folder, we included a lenghtier explanation of the evaluation methodology involved in this challenge; in the `notebooks` folder, we include a step-by-step, heavily commented guide on how to build a submission, including sample data points and an example of using a derived RecList for evaluation. A [Kaggle notebook](https://www.kaggle.com/code/vinidd/cikm-data-challenge) is also available. 
+
+In the `baselines` folder, you will find more complex models than the simple random one. Remember: this competition is about models as much as about _data_ and _testing_ - take our initial work just as an inspiration!
 
 Please refer to the provided examples for in-depth explanations, and don't forget to reach out on Slack if you have any doubt.
 
 ## How easy it is to join?
 
-Very easy! If you already have a recommendation model you just need to wrap training and prediction in objects consistent with our API. 
-
-### Training
-
-```python
-
-class MyEvalRSRunner(EvalRSRunner):
-    def train_model(self, train_df: pd.DataFrame, **kwargs):
-        """
-        Inherit from the Challenge class EvalRSRunner, and implement your training logic
-        in this function. Return a trained model.
-        """
-        # do your magic here
-        model.train(train_df)
-        # store your model into a model object - see below
-        my_model = MyModel(model, top_k=20))
-        # return the trained model in the proper wrapper
-        return my_model
-```
-
-### Prediction
+Very easy! If you already have a recommendation model you just need to wrap training and prediction in a model object consistent with our API, i.e. an object having a `train` and `predict` method.
 
 ```python
 
 class MyModel(RecModel):
     
-    def __init__(self, model, top_k=20):
-       # implement your init logic here
-       self._model = model
-       self.top_k = top_k
+    def __init__(self, items: pd.DataFrame, top_k: int=20):
+        super(MyModel, self).__init__()
+        self.top_k = top_k
+        self.items = items
+
+    def train(self, train_df: pd.DataFrame, **kwargs):
+        """
+        Implement here your training logic. Since our example method is a simple random model,
+        we actually don't use any training data to build the model, but you should ;-)
+
+        At the end of training, make sure the class contains a trained model you can use in the predict method.
+        """
+        # kwargs may contain additional arguments in case, for example, you
+        # have data augmentation strategies
+        print("Received additional arguments: {}".format(kwargs))
+        print(train_df.head(1))
+        print("Training completed!")
+        return 
 
     def predict(self, user_ids: pd.DataFrame) -> pd.DataFrame:
         """
-        Implement your logic here: given the user Ids in the test set, recommend the top-k songs for them.
+        
+        This function takes as input all the users that we want to predict the top-k items for, and 
+        returns all the predicted songs.
+
+        While in this example is just a random generator, the same logic in your implementation 
+        would allow for batch predictions of all the target data points.
+        
         """
         k = self.top_k
-        # do your magic here
-        pred = self._model.predict(user_ids, k)
-        
-        return pd.DataFrame(pred, columns=['user_id', *[ str(i) for i in range(k)]]).set_index('user_id')
+        num_users = len(user_ids)
+        pred = self.items.sample(n=k*num_users, replace=True).index.values
+        pred = pred.reshape(num_users, k)
+        pred = np.concatenate((user_ids[['user_id']].values, pred), axis=1)
+        return pd.DataFrame(pred, columns=['user_id', *[str(i) for i in range(k)]]).set_index('user_id')
 
 ```
 
