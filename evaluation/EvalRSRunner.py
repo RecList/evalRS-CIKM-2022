@@ -92,7 +92,11 @@ class ChallengeDataset:
 
     def _get_test_set(self, fold: int, limit: int = None) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
-        return self._test_set[self._test_set['fold'] == fold][['user_id', 'track_id']]
+        test_set = self._test_set[self._test_set['fold'] == fold][['user_id', 'track_id']]
+        if limit:
+            return test_set.sample(n=limit)
+        else:
+            return test_set
 
     def get_sample_train_test(self):
         return self._get_train_set(1), self._get_test_set(1)
