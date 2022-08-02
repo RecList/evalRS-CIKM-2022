@@ -18,7 +18,7 @@ from reclist.abstractions import RecList
 from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
 from collections import defaultdict
 from evaluation.utils import download_with_progress, get_cache_directory, LFM_DATASET_PATH, decompress_zipfile, \
-    upload_submission
+    upload_submission, TOP_K_CHALLENGE
 
 
 class ChallengeDataset:

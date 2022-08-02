@@ -19,6 +19,7 @@ from datetime import datetime
 
 LFM_DATASET_PATH="https://cikm-evalrs-dataset.s3.us-west-2.amazonaws.com/evalrs_dataset.zip"
 
+TOP_K_CHALLENGE = 20
 
 def download_with_progress(url, destination):
     """

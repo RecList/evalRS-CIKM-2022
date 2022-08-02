@@ -13,7 +13,7 @@
 """
 import pandas as pd
 from reclist.abstractions import RecList, RecDataset, rec_test
-
+from evaluation.utils import TOP_K_CHALLENGE
 
 class EvalRSRecList(RecList):
 
@@ -22,12 +22,11 @@ class EvalRSRecList(RecList):
                         y_preds: pd.DataFrame,
                         y_test: pd.DataFrame,
                         slice_info: pd.DataFrame,
-                        slice_key: str,
-                        k: int):
+                        slice_key: str):
 
         from reclist.metrics.standard_metrics import rr_at_k
         # get rr (reciprocal rank) for each prediction made
-        rr = rr_at_k(y_preds, y_test, k=k)
+        rr = rr_at_k(y_preds, y_test, k=TOP_K_CHALLENGE)
         # convert to DataFrame
         rr = pd.DataFrame(rr, columns=['rr'], index=y_test.index)
         # grab slice info
@@ -48,13 +47,13 @@ class EvalRSRecList(RecList):
     @rec_test('HIT_RATE')
     def hit_rate_at_20(self):
         from reclist.metrics.standard_metrics import hit_rate_at_k
-        hr = hit_rate_at_k(self._y_preds, self._y_test, k=20)
+        hr = hit_rate_at_k(self._y_preds, self._y_test, k=TOP_K_CHALLENGE)
         return hr
 
     @rec_test('MRR')
     def mrr_at_20(self):
         from reclist.metrics.standard_metrics import mrr_at_k
-        return mrr_at_k(self._y_preds, self._y_test, k=20)
+        return mrr_at_k(self._y_preds, self._y_test, k=TOP_K_CHALLENGE)
 
     @rec_test('MRR_COUNTRY')
     def mrr_at_20_country(self):
@@ -63,7 +62,7 @@ class EvalRSRecList(RecList):
                                    self._y_test,
                                    user_countries,
                                    'country',
-                                   k=20)
+                                   k=TOP_K_CHALLENGE)
 
 
 
