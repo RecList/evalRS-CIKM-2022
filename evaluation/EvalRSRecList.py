@@ -11,7 +11,7 @@
     the community!
 
 """
-
+import pandas as pd
 from reclist.abstractions import RecList, RecDataset, rec_test
 
 
@@ -32,6 +32,29 @@ class EvalRSRecList(RecList):
         hr = hit_rate_at_k(self._y_preds, self._y_test, k=20)
         return hr
 
+    @rec_test('MRR')
+    def mrr_at_20(self):
+        from reclist.metrics.standard_metrics import mrr_at_k
+        return mrr_at_k(self._y_preds, self._y_test, k=20)
+
+    def rmse_by_slice(self, slice: str):
+        sq_error = self.squared_error(self._y_preds[['rating']], self._y_test[['rating']])
+        sq_error[slice] = self.product_data.loc[self._x_test['movie_id']][slice].values
+        return sq_error.explode(slice).groupby(slice)['rating'].agg("mean")
+
+    @rec_test('MRR_COUNTRY')
+    def mrr_at_20_country(self):
+        from reclist.metrics.standard_metrics import rr_at_k
+        # get reciprocal rank for each prediction made
+        rr = rr_at_k(self._y_preds, self._y_test, k=20)
+        # convert to DataFrame
+        rr = pd.DataFrame(rr, columns=['rr'])
+        rr.index = self._y_preds.index
+        # get country info
+        rr['country'] = self.product_data['users'].loc[self._x_test['user_id'], 'country'].values
+
+        # group-by slice and get per-slice mrr
+        return rr.groupby('country')['rr'].agg('mean').to_json()
 
 class EvalRSDataset(RecDataset):
     def load(self, **kwargs):
