@@ -17,6 +17,25 @@ from reclist.abstractions import RecList, RecDataset, rec_test
 
 class EvalRSRecList(RecList):
 
+
+    def mrr_at_k_slice(self,
+                        y_preds: pd.DataFrame,
+                        y_test: pd.DataFrame,
+                        slice_info: pd.DataFrame,
+                        slice_key: str,
+                        k: int):
+
+        from reclist.metrics.standard_metrics import rr_at_k
+        # get rr (reciprocal rank) for each prediction made
+        rr = rr_at_k(y_preds, y_test, k=k)
+        # convert to DataFrame
+        rr = pd.DataFrame(rr, columns=['rr'], index=y_test.index)
+        # grab slice info
+        rr[slice_key]  =slice_info[slice_key].values
+        # group-by slice and get per-slice mrr
+        return rr.groupby(slice_key)['rr'].agg('mean').to_json()
+
+
     @rec_test('stats')
     def stats(self):
         tracks_per_users = (self._y_test.values!=-1).sum(axis=1)
@@ -39,16 +58,15 @@ class EvalRSRecList(RecList):
 
     @rec_test('MRR_COUNTRY')
     def mrr_at_20_country(self):
-        from reclist.metrics.standard_metrics import rr_at_k
-        # get reciprocal rank for each prediction made
-        rr = rr_at_k(self._y_preds, self._y_test, k=20)
-        # convert to DataFrame
-        rr = pd.DataFrame(rr, columns=['rr'])
-        rr.index = self._y_preds.index
-        # get country info
-        rr['country'] = self.product_data['users'].loc[self._x_test['user_id'], 'country'].values
-        # group-by slice and get per-slice mrr
-        return rr.groupby('country')['rr'].agg('mean').to_json()
+        user_countries = self.product_data['users'].loc[self._y_test.index, ['country']]
+        return self.mrr_at_k_slice(self._y_preds,
+                                   self._y_test,
+                                   user_countries,
+                                   'country',
+                                   k=20)
+
+
+
 
 class EvalRSDataset(RecDataset):
     def load(self, **kwargs):
