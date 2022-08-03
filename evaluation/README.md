@@ -2,7 +2,7 @@
 
 `EvalRSRunner` (defined in`EvalRSRunner.py`) is a class which encapsulates the evaluation approach for EvalRS (Bootstrapped Nested Cross-Validation). Being this challenge a _code competiton_ on a public dataset, we could not rely on unseen test data to produce a final leaderboard.
 
-Our approach is illustrated in the following diagram: subsets of the original dataset are randomly designated as train and test set; `EvalRSRunner` will automatically feed them to the model object you provide (with your training and prediction logic), and the predictions will be scored with RecList. 
+Our approach is illustrated in the following diagram: subsets of the original dataset are randomly designated as train and test set; `EvalRSRunner` will automatically feed them to the model object you provide (with your training and prediction logic), and the predictions will be scored with RecList. Sampling is per-user, and testing is based on the "leave-one-out" principle: for each user, we pick a track and leave it for the test set as the target item for the predictions.
 
 ![Loop explanation](../images/loop.jpg)
 
