@@ -11,6 +11,7 @@
     the community!
 
 """
+import numpy as np
 import pandas as pd
 from reclist.abstractions import RecList, RecDataset, rec_test
 
@@ -65,11 +66,26 @@ class EvalRSRecList(RecList):
                                    'country',
                                    k=20)
 
+    @rec_test('MRR_ACTIVITY')
+    def mrr_at_20_activity(self):
+        bins = np.array([10,100,1000,10000])
+        user_activity = self._x_train[self._x_train['user_id'].isin(self._y_test.index)]
+        user_activity = user_activity.groupby('user_id',as_index=True, sort=False)[['user_track_count']].sum()
+        user_activity = user_activity.loc[self._y_test.index]
 
+        user_activity['bin_index'] = np.digitize(user_activity.values.reshape(-1), bins)
+        user_activity['bins'] = bins[user_activity['bin_index'].values-1]
+
+        return self.mrr_at_k_slice(self._y_preds,
+                                   self._y_test,
+                                   user_activity,
+                                   'bins',
+                                   k=20)
 
 
 class EvalRSDataset(RecDataset):
     def load(self, **kwargs):
+        self._x_train = kwargs.get('x_train')
         self._x_test = kwargs.get('x_test')
         self._y_test = kwargs.get('y_test')
         self._catalog = {
