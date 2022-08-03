@@ -102,7 +102,7 @@ P.s.: if something in the procedure goes wrong, please contact us through Slack!
 
 A valid submission script can be obtained by copying into your repository `submission.py`, and modify `MyModel.py` to use your logic instead of the default (random) one. Your submission is required to build an instance of a `RecModel`, providing an implementation for the `train` and `predict` methods.
 
-In the `evaluation` folder, we included a lenghtier explanation of the evaluation methodology involved in this challenge; in the `notebooks` folder, we include a step-by-step, heavily commented guide on how to build a submission, including sample data points and an example of using a derived RecList for evaluation. A [Kaggle notebook](https://www.kaggle.com/code/vinidd/cikm-data-challenge) is also available. 
+In the `evaluation` folder, we included a [lenghtier explanation of the evaluation methodology](/evaluation/README.md) involved in this challenge; in the `notebooks` folder, we include a step-by-step, heavily commented guide on how to build a submission, including sample data points and an example of using a derived RecList for evaluation. A [Kaggle notebook](https://www.kaggle.com/code/vinidd/cikm-data-challenge) is also available. 
 
 In the `baselines` folder, you will find more complex models than the simple random one. Remember: this competition is about models as much as about _data_ and _testing_ - take our initial work just as an inspiration!
 
