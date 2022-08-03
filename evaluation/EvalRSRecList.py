@@ -64,8 +64,8 @@ class EvalRSRecList(RecList):
                                    user_countries,
                                    'country')
 
-    @rec_test('MRR_ACTIVITY')
-    def mrr_at_20_activity(self):
+    @rec_test('MRR_USER_ACTIVITY')
+    def mrr_at_20_user_activity(self):
         bins = np.array([10,100,1000,10000])
         user_activity = self._x_train[self._x_train['user_id'].isin(self._y_test.index)]
         user_activity = user_activity.groupby('user_id',as_index=True, sort=False)[['user_track_count']].sum()
@@ -79,6 +79,29 @@ class EvalRSRecList(RecList):
                                    user_activity,
                                    'bins')
 
+    @rec_test('MRR_ARTIST_POPULARITY')
+    def mrr_at_20_artist_popularity(self):
+        bins = np.array([10, 100, 1000, 10000, 100000])
+        artist_id = self.product_data['items'].loc[self._y_test['track_id'], 'artist_id']
+        artist_activity = self._x_train[self._x_train['artist_id'].isin(artist_id)]
+        artist_activity = artist_activity.groupby('artist_id', as_index=True, sort=False)[['user_track_count']].sum()
+        artist_activity = artist_activity.loc[artist_id]
+
+        artist_activity['bin_index'] = np.digitize(artist_activity.values.reshape(-1), bins)
+        artist_activity['bins'] = bins[artist_activity['bin_index'].values - 1]
+
+        return self.mrr_at_k_slice(self._y_preds,
+                                   self._y_test,
+                                   artist_activity,
+                                   'bins')
+
+    @rec_test('MRR_GENDER')
+    def mrr_at_20_gender(self):
+        user_gender = self.product_data['users'].loc[self._y_test.index, ['gender']]
+        return self.mrr_at_k_slice(self._y_preds,
+                                   self._y_test,
+                                   user_gender,
+                                   'gender')
 
 class EvalRSDataset(RecDataset):
     def load(self, **kwargs):
