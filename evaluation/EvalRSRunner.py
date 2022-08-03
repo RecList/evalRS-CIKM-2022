@@ -18,7 +18,7 @@ from reclist.abstractions import RecList
 from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
 from collections import defaultdict
 from evaluation.utils import download_with_progress, get_cache_directory, LFM_DATASET_PATH, decompress_zipfile, \
-    upload_submission
+    upload_submission, TOP_K_CHALLENGE
 
 
 class ChallengeDataset:
@@ -211,16 +211,19 @@ class EvalRSRunner:
             'hash': hash(self)
         }
         # TODO: dump data somewhere better?
-        local_file = '{}_{}.json'.format(self.email.replace('@', '_'), int(time.time() * 10000))
-        with open(local_file, 'w') as outfile:
-            json.dump(out_dict, outfile, indent=2)
-        print('SUBMISSION RESULTS SAVE TO {}'.format(local_file))
-        if upload:
-            upload_submission(local_file,
-                              aws_access_key_id=self.aws_access_key_id,
-                              aws_secret_access_key=self.aws_secret_access_key,
-                              participant_id=self.participant_id,
-                              bucket_name=self.bucket_name)
+        if self.email:
+
+            local_file = '{}_{}.json'.format(self.email.replace('@', '_'), int(time.time() * 10000))
+            with open(local_file, 'w') as outfile:
+                json.dump(out_dict, outfile, indent=2)
+            print('SUBMISSION RESULTS SAVE TO {}'.format(local_file))
+
+            if upload:
+                upload_submission(local_file,
+                                  aws_access_key_id=self.aws_access_key_id,
+                                  aws_secret_access_key=self.aws_secret_access_key,
+                                  participant_id=self.participant_id,
+                                  bucket_name=self.bucket_name)
 
     def __hash__(self):
         hash_inputs = [
