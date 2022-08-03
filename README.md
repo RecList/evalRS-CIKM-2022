@@ -58,11 +58,12 @@ For information on how the original dataset was built and what meta-data are ava
 
 * Register [Online](https://reclist.io/cikm2022-cup/leaderboard.html). You should get some tokens, save them for later! 
 
-### Second Step: Run The Example
 
-A sample submission script is included in this repository as a template. We suggest you run it _as soon as you have received your credentials_ to check that your setup is correct. To do so:
+### Second Step: Setup your environment
 
-A couple of commands to start; downlad the repo and setup a virtual environment. _NOTE_: the code has been developed and tested with Python 3.8: please use the same version for reproducibility.
+#### Locally
+
+If you just want to run it on your local computer, download the repo and setup a virtual environment. _NOTE_: the code has been developed and tested with Python 3.8: please use the same version for reproducibility.
 
 ```bash
 git clone https://github.com/RecList/evalRS-CIKM-2022
@@ -70,6 +71,16 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
+
+#### Via Codespaces
+
+Otherwise, you can just launch the project by using Github Codespaces. Click on the green "code" button on the top of the Github page, select "Codespaces" and click on "Create codespaces on main".
+Be aware, Github Codespaces is still in beta, if you don't have already applied for it, you can do it from here: [Sign up for the Codespaces beta](https://github.com/features/codespaces/signup)
+
+
+### Third Step: Configure your envs
+
+A sample submission script is included in this repository as a template. We suggest you run it _as soon as you have received your credentials_ to check that your setup is correct.
 
 We use dot files to manage secret keys. Copy the `local.env` file and create an 
 `upload.env` (**DO NOT** commit this file). You can fill this file with the keys you got at step 1 (plus some global flags, if you wish to use them in your code - for example an `UPLOAD` flag if you wish to disable upload):
@@ -98,7 +109,7 @@ Click [here](https://reclist.io/cikm2022-cup/leaderboard.html) to see the leader
 
 P.s.: if something in the procedure goes wrong, please contact us through Slack!
 
-### Third Step: Run your code
+### Fourth Step: Run your code
 
 A valid submission script can be obtained by copying into your repository `submission.py`, and modify `MyModel.py` to use your logic instead of the default (random) one. Your submission is required to build an instance of a `RecModel`, providing an implementation for the `train` and `predict` methods.
 
