@@ -5,7 +5,7 @@
     your logic, instead of the random baseline. Most of this script should be left unchanged for your submission
     as we should be able to run your code to confirm your scores.
 
-    Please make sure you read and understand the competition rule and guidelines before you start.
+    Please make sure you read and understand the competition rules and guidelines before you start.
 
 """
 
