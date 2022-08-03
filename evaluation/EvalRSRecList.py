@@ -62,8 +62,7 @@ class EvalRSRecList(RecList):
         return self.mrr_at_k_slice(self._y_preds,
                                    self._y_test,
                                    user_countries,
-                                   'country',
-                                   k=TOP_K_CHALLENGE)
+                                   'country')
 
     @rec_test('MRR_ACTIVITY')
     def mrr_at_20_activity(self):
@@ -78,8 +77,7 @@ class EvalRSRecList(RecList):
         return self.mrr_at_k_slice(self._y_preds,
                                    self._y_test,
                                    user_activity,
-                                   'bins',
-                                   k=TOP_K_CHALLENGE)
+                                   'bins')
 
 
 class EvalRSDataset(RecDataset):
