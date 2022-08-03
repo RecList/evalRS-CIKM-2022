@@ -43,7 +43,6 @@ class ChallengeDataset:
         assert os.path.exists(self.path_to_users)
 
         print("Loading dataset.")
-        # TODO: Verfiy dtype do not cause overflow
         self.df_events = pd.read_csv(self.path_to_events, index_col=0, dtype='int32')
         self.df_tracks = pd.read_csv(self.path_to_tracks,
                                      dtype={
@@ -62,8 +61,9 @@ class ChallengeDataset:
 
         print("Generating folds.")
         self.num_folds = num_folds
+        self.unique_user_ids_df = self.df_events[['user_id']].drop_duplicates()
         self._random_state = int(time.time()) if not seed else seed
-        self._test_set = self._generate_folds(self.num_folds, self._random_state)
+        self._fold_ids, self._test_set = self._generate_folds(self.num_folds, self._random_state)
 
         print("Generating dataset hashes.")
         self._events_hash = hashlib.sha256(pd.util.hash_pandas_object(self.df_events.sample(n=1000,
@@ -77,18 +77,30 @@ class ChallengeDataset:
                                                                                           random_state=0)).values
                                           ).hexdigest()
 
-    def _generate_folds(self, num_folds: int, seed: int) -> pd.DataFrame:
-        df_groupby = self.df_events.groupby(by='user_id', as_index=False)
-        df_test = df_groupby.sample(n=num_folds, replace=True, random_state=seed)[['user_id', 'track_id']]
-        df_test['ones'] = 1
-        df_test['fold'] = df_test.groupby('user_id', as_index=False)['ones'].cumsum().values - 1
-        df_test = df_test.drop('ones', axis=1)
-        return df_test
+    def _generate_folds(self, num_folds: int, seed: int, frac=0.25) -> (pd.DataFrame, pd.DataFrame):
+
+        fold_ids = [(self.unique_user_ids_df.sample(frac=frac)
+                     .reset_index(drop=True)
+                     .rename({'user_id': _}, axis=1)) for _ in range(4)]
+        df_fold_user_ids = pd.concat(fold_ids, axis=1)
+
+        test_dfs = []
+        for fold in range(num_folds):
+            df_groupby = self.df_events[self.df_events['user_id'].isin(df_fold_user_ids[fold])].groupby(by='user_id', as_index=False)
+            df_test = df_groupby.sample(n=1, random_state=seed)[['user_id', 'track_id']]
+            df_test['fold'] = fold
+            test_dfs.append(df_test)
+        df_test = pd.concat(test_dfs, axis=0)
+
+        return df_fold_user_ids, df_test
 
     def _get_train_set(self, fold: int) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
+
         test_index = self._test_set[self._test_set['fold']==fold].index
-        return self.df_events.loc[self.df_events.index.difference(test_index)]
+        train_fold = self.df_events.loc[self.df_events['user_id'].isin(self._fold_ids[fold])]
+
+        return train_fold.loc[train_fold.index.difference(test_index)]
 
     def _get_test_set(self, fold: int, limit: int = None) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
@@ -152,9 +164,8 @@ class EvalRSRunner:
             # to pass additional stuff
             **kwargs 
     ):
-
-        print("Generating data folds.")
-
+        if debug:
+            print('\nBegin Evaluation... ')
         self._random_state = int(time.time()) if not seed else seed
         self.model = model
 
