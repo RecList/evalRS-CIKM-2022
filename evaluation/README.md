@@ -2,8 +2,13 @@
 
 `EvalRSRunner` (defined in`EvalRSRunner.py`) is a class which encapsulates the evaluation approach for EvalRS (Bootstrapped Nested Cross-Validation). Being this challenge a _code competiton_ on a public dataset, we could not rely on unseen test data to produce a final leaderboard.
 
-[comment]: <> (Describe BNCV in some detail)
+Our approach is illustrated in the following diagram: subsets of the original dataset are randomly designated as train and test set; `EvalRSRunner` will automatically feed them to the model object you provide (with your training and prediction logic), and the predictions will be scored with RecList. 
 
+![Loop explanation](../images/loop.jpg)
+
+This procedure will be repetead _n_ times, and your average scores will be uploaded at the end (the library will take care of it) and determine your position on the leaderboard. Due to the stochastic nature of the loop, scores will vary slightly between runs, but the organizing committee will still be able to statistically evaluate your code submission in the light of your scores. As stated in the rules, since this is a code competition, _reproducibility_ is essential: please take your time to make sure that you understand the submission scripts and that your final project is easily reproducible from scracth.
+
+_Note_: when you instantiate the `ChallengeDataset`, `num_folds` determines how many times the evaluation procedure is run. Default is 4, and that is the value you should use for all your leaderboard submissions.
 
 ## How to use the provided abstractions
 
