@@ -79,7 +79,7 @@ class EvalRSRecList(RecList):
                                    self._y_test,
                                    user_activity,
                                    'bins',
-                                   k=20)
+                                   k=TOP_K_CHALLENGE)
 
 
 class EvalRSDataset(RecDataset):
