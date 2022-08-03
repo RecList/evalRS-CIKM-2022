@@ -62,7 +62,7 @@ For information on how the original dataset was built and what meta-data are ava
 
 A sample submission script is included in this repository as a template. We suggest you run it _as soon as you have received your credentials_ to check that your setup is correct. To do so:
 
-A couple of commands to start; downlad the repo and setup a virtual environment.
+A couple of commands to start; downlad the repo and setup a virtual environment. _NOTE_: the code has been developed and tested with Python 3.8: please use the same version for reproducibility.
 
 ```bash
 git clone https://github.com/RecList/evalRS-CIKM-2022
