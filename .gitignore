@@ -132,6 +132,7 @@ dmypy.json
 upload.env
 
 *.json
+!devcontainer.json
 
 .DS_Store
 
