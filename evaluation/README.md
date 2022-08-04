@@ -95,4 +95,23 @@ Please see the `notebooks` folder for a walk-through on the evaluation engine, a
 
 ## Last.FM RecList
 
+We prepared a set of quantitative, sliced-based and behavioral tests for the Last.FM use case, inspired by our [previous work](https://reclist.io/) on the topic and the existing literature on fairness, evaluation and biases.
+
+We detail here the individual tests implemented in the `EvalRSRecList` class, and provide some context on why they are chosen and how they are operationalized: of course, feel free to check the code for implementation details.
+
+### Individual tests
+
 _TBC_
+
+Please note that the RecList used by the evaluation script may (and actually _should_, since your final code submission requires at least one custom test) contain additonal tests on top of the ones that concur to define the leaderboard score. You can, in fact, extend the RecList with as many tests as you want to write your paper, debug your system, uncover some new data insight: remember, EvalRS is about testing as much as scoring! However, only the tests listed above are the ones included in the leaderboard calculation.
+
+### Aggregating the scores into the leadearboard macro-score
+
+As explained in the rules, we adopt a timeline in two phases for the leadeboard scoring:
+
+* in the first phase, scores of individual tests are simply averaged to get the macro-score for the leaderboard (your submission e-mail will still contain detailed information about each test);
+* at the start of the second phase (Sept. 1st), you will be required to pull an updated evaluation script from this repository: the new script will contain a novel aggregation function which will be openly shared on Slack. This function will consider the scores for individual tests across all teams in the first phase, and acts as an equalizer between tests - i.e. if a test is easy for everybody, its importance will be downplayed in the macro-score. _Only scores obtained in the second phase are considered for the final prizes_. 
+
+Practically, you won't have to change anything in your model code between the two phases, as everything is handled magically for you by the provided abstractions. As in phase 1, we encourage you to submit often in phase 2 as well.
+
+![Challenge two phases](../images/phases.jpg)
