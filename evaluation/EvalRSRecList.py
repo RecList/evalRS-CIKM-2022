@@ -61,7 +61,7 @@ class EvalRSRecList(RecList):
         fpr = false_positives_at_k(y_preds, y_test, k=TOP_K_CHALLENGE).min(axis=2).mean()
         fped = (fpr_per_slice-fpr).abs().mean()
         res = fpr_per_slice.to_dict()
-        return { 'fped': fped, 'frp': fpr, **res}
+        return {'fped': fped, 'fpr': fpr, **res}
 
 
     def cosine_sim(self, u: np.array, v: np.array) -> np.array:
