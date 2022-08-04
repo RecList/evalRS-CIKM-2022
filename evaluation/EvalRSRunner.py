@@ -77,36 +77,87 @@ class ChallengeDataset:
                                                                                           random_state=0)).values
                                           ).hexdigest()
 
+
+    def _get_vertice_count(self, df, column_name:str):
+        df = df.copy()
+        df['counts'] = 1
+        counts = df.groupby(column_name, as_index=True)[['counts']].sum()
+        return counts
+
+    def _k_core_filter(self, df_user_track: pd.DataFrame, k=10):
+        num_users_prev, num_tracks_prev = None, None
+        delta = True
+        while delta:
+            track_counts = self._get_vertice_count(df_user_track, 'track_id')
+            valid_tracks = track_counts[track_counts['counts']>=k].index
+            # keep only valid tracks
+            df_user_track = df_user_track[df_user_track['track_id'].isin(valid_tracks)]
+            user_counts = self._get_vertice_count(df_user_track, 'user_id')
+            valid_users = user_counts[user_counts['counts']>=k].index
+            # keep only valid users
+            df_user_track = df_user_track[df_user_track['user_id'].isin(valid_users)]
+
+            num_tracks = len(valid_tracks)
+            num_users = len(valid_users)
+
+            delta = (num_users != num_users_prev) or (num_tracks != num_tracks_prev)
+
+            num_users_prev = num_users
+            num_tracks_prev = num_tracks
+
+            # print("THERE ARE {} VALID TRACKS; MIN VERTICES {}".format(len(valid_tracks), track_counts['counts'].min()))
+            # print("THERE ARE {} VALID USERS; MIN VERTICES {}".format(len(valid_users), user_counts['counts'].min()))
+
+        return valid_users, valid_tracks
+
     def _generate_folds(self, num_folds: int, seed: int, frac=0.25) -> (pd.DataFrame, pd.DataFrame):
 
         fold_ids = [(self.unique_user_ids_df.sample(frac=frac)
                      .reset_index(drop=True)
                      .rename({'user_id': _}, axis=1)) for _ in range(4)]
+        # in theory all users should have at least 10 interactions
         df_fold_user_ids = pd.concat(fold_ids, axis=1)
 
         test_dfs = []
+        fold_user_ids = []
         for fold in range(num_folds):
-            df_groupby = self.df_events[self.df_events['user_id'].isin(df_fold_user_ids[fold])].groupby(by='user_id', as_index=False)
+            df_fold_events = self.df_events[self.df_events['user_id'].isin(df_fold_user_ids[fold])]
+
+            valid_user_ids, valid_track_ids = self._k_core_filter(df_fold_events[['user_id','track_id']])
+            df_fold_events = df_fold_events[df_fold_events['user_id'].isin(valid_user_ids)]
+            df_fold_events = df_fold_events[df_fold_events['track_id'].isin(valid_track_ids)]
+
+            df_groupby = df_fold_events.groupby(by='user_id', as_index=False)
             df_test = df_groupby.sample(n=1, random_state=seed)[['user_id', 'track_id']]
             df_test['fold'] = fold
             test_dfs.append(df_test)
-        df_test = pd.concat(test_dfs, axis=0)
+            unique_user_id = pd.DataFrame(df_fold_events['user_id'].unique(), columns=['user_id'])
+            unique_user_id['fold'] = fold
+            fold_user_ids.append(unique_user_id)
 
-        return df_fold_user_ids, df_test
+        df_test = pd.concat(test_dfs, axis=0)
+        df_users = pd.concat(fold_user_ids, axis=0)
+
+        # print(df_test)
+        # print('====')
+        # print(df_users)
+        # print('====')
+        return df_users, df_test
 
     def _get_train_set(self, fold: int) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
 
         test_index = self._test_set[self._test_set['fold']==fold].index
-        train_fold = self.df_events.loc[self.df_events['user_id'].isin(self._fold_ids[fold])]
+        fold_users = self._fold_ids[self._fold_ids['fold']==fold]['user_id']
+        train_fold = (self.df_events.loc[self.df_events['user_id'].isin(fold_users)])
 
         return train_fold.loc[train_fold.index.difference(test_index)]
 
-    def _get_test_set(self, fold: int, limit: int = None) -> pd.DataFrame:
+    def _get_test_set(self, fold: int, limit: int = None, seed: int =0) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
         test_set = self._test_set[self._test_set['fold'] == fold][['user_id', 'track_id']]
         if limit:
-            return test_set.sample(n=limit)
+            return test_set.sample(n=limit, random_state=seed)
         else:
             return test_set
 
@@ -143,7 +194,8 @@ class EvalRSRunner:
         y_test = test_set_df.set_index('user_id')
 
         dataset = EvalRSDataset()
-        dataset.load(x_test=x_test,
+        dataset.load(x_train=self.dataset._get_train_set(fold=fold),
+                     x_test=x_test,
                      y_test=y_test,
                      users=self.dataset.df_users,
                      items=self.dataset.df_tracks)
