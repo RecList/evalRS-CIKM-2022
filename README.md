@@ -34,7 +34,7 @@ Among all possible datasets, we picked LFM as it suits the spirit and the goal o
 
 ### Data overview
 
-When you run the evaluation loop below (below), the code will automatically download _a chosen subset of the LFM dataset_, ready to be used (the code will download it only the first time you run it). There are three main objects available from the provided evaluation class:
+When you run the evaluation loop below, the code will automatically download _a chosen subset of the LFM dataset_, ready to be used (the code will download it only the first time you run it). There are three main objects available from the provided evaluation class:
 
 _Users_: a collection of users and available meta-data, including patterns of consumption, demographics etc.. In the Data Challenge scenario, the user Id is the query item for the model, which is asked to recommend songs to the user.
 
@@ -216,11 +216,11 @@ Given the novelty of the challenges, it is a non-trivial question on how to comb
 
 ![Challenge two phases](images/phases.jpg)
 
-In the first phase, the leaderboard is a simple average of the scores in each test from our test suite: every time you submit you will receive an e-mail with full scoring details, allowing you to understand the tests and your models in depth. _We encourage you to submit many items and iterate fast in this first phase_. 
+In the first phase, the leaderboard is a simple average of the scores in each test from our test suite: every time you submit you will receive an e-mail with full scoring details, allowing you to understand the tests and your models in depth. _We encourage you to submit many times and iterate fast in this first phase_. 
 
-We will use the scores collected in phase 1 to push an update to the evaluation script (we will notify everyone in the Slack channel), and then open phase 2, in which the final score will be weighted based on the distribution of individual tests: i.e. if some tests turn out to be easy across teams, their importance will be downplayed. Only the score in the leaderboard at the end of phase 2 are considered for the prizes (see below).
+We will use the scores collected in phase 1 to push an update to the evaluation script (we will notify everyone in the Slack channel), and then open phase 2, in which the final score will be weighted based on the distribution of individual tests: i.e. if some tests turn out to be easy across teams, their importance will be downplayed. Only the score in the leaderboard at the end of phase 2 are considered for the prizes below.
 
-Practically, your evaluation routine won't change between the two phases (if not for updating the repo when we tell you to do so), as all the aggregation logic is handled automatically by our script; however, when moving from phase 1 to phase 2 your model may perform differently on the leaderboard: the second phase of the challenge will give you the chance to optimize the model according to the final weighting scheme and do understand even better the nature of the testing strategy.
+Practically, your evaluation routine won't change between the two phases (if not for updating the repo), as all the aggregation logic is handled automatically by our script; however, when moving from phase 1 to phase 2 your model may perform differently on the leaderboard: the second phase of the challenge will give you the chance to optimize the model according to the final weighting scheme, and to understand even better the nature of the testing strategy.
 
 _The prizes_
 
