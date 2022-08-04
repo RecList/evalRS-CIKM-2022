@@ -6,7 +6,7 @@ Our approach is illustrated in the following diagram: subsets of the original da
 
 ![Loop explanation](../images/loop.jpg)
 
-This procedure will be repetead _n_ times, and your average scores will be uploaded at the end (the library will take care of it) and determine your position on the leaderboard. Due to the stochastic nature of the loop, scores will vary slightly between runs, but the organizing committee will still be able to statistically evaluate your code submission in the light of your scores. As stated in the rules, since this is a code competition, _reproducibility_ is essential: please take your time to make sure that you understand the submission scripts and that your final project is easily reproducible from scracth.
+This procedure will be repetead _n_ times, and your average scores will be uploaded at the end (the library will take care of it) and determine your position on the leaderboard. The _n_ folds are not ensured to have disjoint sets of users, as they are generated randomly in a stateless fashion: each round in the evaluation loop is independent from the others. Due to the stochastic nature of the loop, scores will vary slightly between runs, but the organizing committee will still be able to statistically evaluate your code submission in the light of your scores. As stated in the rules, since this is a code competition, _reproducibility_ is essential: please take your time to make sure that you understand the submission scripts and that your final project is easily reproducible from scracth.
 
 As demonstrated by the notebook and `submission.py`, you do _not_ have to worry about any of the above implementation details: folds are generated for you and predictions are automatically compared to ground truths by the provided code and RecList.
 
@@ -33,8 +33,7 @@ First, you should inherit `RecModel` and implement the `train` method: `train` s
 
 Second, when the training is done, you should wrap your predictions in a method `predict`: `train` should store the trained model inside the class, and `predict` will use that model to provide predictions. The `predict` method accepts as input a dataframe of all the user IDs for which the model is asked to make a prediction on.
 
-For each `user_id`, we expect `k` predictions (where `k=20` for the competition): you can play around with different Ks for debugging purposes _but_ only `k=20` will be accepted for the leaderboard. [The expected prediction output is a dataframe](../images/prediction.jpg) with `user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank). In addition, it is expected that the predictions are in the same order as the `user_id` in the input dataframe. An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, 
-the empty columns should be filled with `-1`. 
+For each `user_id`, we expect `k` predictions (where `k=20` for the competition): you can play around with different Ks for debugging purposes _but_ only `k=20` will be accepted for the leaderboard. [The expected prediction output is a dataframe](../images/prediction.jpg) with `user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank). In addition, it is expected that the predictions are in the same order as the `user_id` in the input dataframe. An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, the empty columns should be filled with `-1`. 
 
  |           |  0          | ...        | k-1         | 
 | ---------- | ----------  | ---------- | ----------- |
@@ -43,6 +42,8 @@ the empty columns should be filled with `-1`.
 | ...        | ...         | ...        | -1          |
 | user_id_n  | track_id_18 | ...        | track_id_9  |
 
+
+Please note that _the number of examples in the dataframe returned by `predict` and the `user_id` in input should match_ and that the user IDs fed to `predict` by the evaluation loop are _unique_.
 
 _Implementing the class, and returning the trained model in the proper wrapper:_
 
