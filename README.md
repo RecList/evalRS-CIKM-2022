@@ -1,6 +1,8 @@
 # EvalRS-CIKM-2022
 Official Repository for EvalRS @ CIKM 2022: a Rounded Evaluation of Recommender Systems
 
+![https://www.kaggle.com/code/vinidd/cikm-data-challenge](https://img.shields.io/badge/Kaggle-Notebook-%2355555)
+
 ![https://reclist.io/cikm2022-cup/](images/back_evalrs.png)
 
 ## Overview
