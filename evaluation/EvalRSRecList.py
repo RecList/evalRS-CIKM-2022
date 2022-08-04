@@ -31,7 +31,7 @@ class EvalRSRecList(RecList):
         # convert to DataFrame
         rr = pd.DataFrame(rr, columns=['rr'], index=y_test.index)
         # grab slice info
-        rr[slice_key]  =slice_info[slice_key].values
+        rr[slice_key] = slice_info[slice_key].values
         # group-by slice and get per-slice mrr
         return rr.groupby(slice_key)['rr'].agg('mean').to_json()
 
@@ -40,7 +40,29 @@ class EvalRSRecList(RecList):
                                    y_test: pd.DataFrame,
                                    slice_info: pd.DataFrame,
                                    slice_key: str):
-        pass
+        from reclist.metrics.standard_metrics import false_positives_at_k
+        # get false positives
+        fp = false_positives_at_k(y_preds, self._y_test, k=TOP_K_CHALLENGE).min(axis=2)
+        # convert to dataframe
+        fp = pd.DataFrame(fp, columns=['fp'], index=y_test.index)
+        # grab slice info
+        fp[slice_key] = slice_info[slice_key].values
+        # group-by slice and get per-slice mrr
+        return fp.groupby(slice_key)['fp'].agg('mean')
+
+    def false_positive_equality_difference(self,
+                                           y_preds: pd.DataFrame,
+                                           y_test: pd.DataFrame,
+                                           slice_info: pd.DataFrame,
+                                           slice_key: str):
+        from reclist.metrics.standard_metrics import false_positives_at_k
+
+        fpr_per_slice = self.false_positives_at_k_slice(y_preds, y_test, slice_info, slice_key)
+        fpr = false_positives_at_k(y_preds, y_test, k=TOP_K_CHALLENGE).min(axis=2).mean()
+        fped = (fpr_per_slice-fpr).abs().mean()
+        res = fpr_per_slice.to_dict()
+        return { 'fped': fped, 'frp': fpr, **res}
+
 
     def cosine_sim(self, u: np.array, v: np.array) -> np.array:
         return  np.sum(u * v, axis=1) / (np.linalg.norm(u, axis=1) * np.linalg.norm(v, axis=1))
@@ -65,16 +87,13 @@ class EvalRSRecList(RecList):
         from reclist.metrics.standard_metrics import mrr_at_k
         return mrr_at_k(self._y_preds, self._y_test, k=TOP_K_CHALLENGE)
 
-    @rec_test('MRR_COUNTRY')
-    def mrr_at_20_country(self):
+    @rec_test('FPED_COUNTRY')
+    def fped_country(self):
         user_countries = self.product_data['users'].loc[self._y_test.index, ['country']]
-        return self.mrr_at_k_slice(self._y_preds,
-                                   self._y_test,
-                                   user_countries,
-                                   'country')
+        return self.false_positive_equality_difference(self._y_preds, self._y_test, user_countries, 'country')
 
-    @rec_test('MRR_USER_ACTIVITY')
-    def mrr_at_20_user_activity(self):
+    @rec_test('FPED_USER_ACTIVITY')
+    def fped_user_activity(self):
         bins = np.array([10,100,1000,10000])
         user_activity = self._x_train[self._x_train['user_id'].isin(self._y_test.index)]
         user_activity = user_activity.groupby('user_id',as_index=True, sort=False)[['user_track_count']].sum()
@@ -83,13 +102,10 @@ class EvalRSRecList(RecList):
         user_activity['bin_index'] = np.digitize(user_activity.values.reshape(-1), bins)
         user_activity['bins'] = bins[user_activity['bin_index'].values-1]
 
-        return self.mrr_at_k_slice(self._y_preds,
-                                   self._y_test,
-                                   user_activity,
-                                   'bins')
+        return self.false_positive_equality_difference(self._y_preds,self._y_test, user_activity, 'bins')
 
-    @rec_test('MRR_ARTIST_POPULARITY')
-    def mrr_at_20_artist_popularity(self):
+    @rec_test('FPED_ARTIST_POPULARITY')
+    def fped_artist_popularity(self):
         bins = np.array([10, 100, 1000, 10000, 100000])
         artist_id = self.product_data['items'].loc[self._y_test['track_id'], 'artist_id']
         artist_activity = self._x_train[self._x_train['artist_id'].isin(artist_id)]
@@ -99,18 +115,12 @@ class EvalRSRecList(RecList):
         artist_activity['bin_index'] = np.digitize(artist_activity.values.reshape(-1), bins)
         artist_activity['bins'] = bins[artist_activity['bin_index'].values - 1]
 
-        return self.mrr_at_k_slice(self._y_preds,
-                                   self._y_test,
-                                   artist_activity,
-                                   'bins')
+        return self.false_positive_equality_difference(self._y_preds, self._y_test, artist_activity, 'bins')
 
-    @rec_test('MRR_GENDER')
-    def mrr_at_20_gender(self):
+    @rec_test('FPED_GENDER')
+    def fped_gender(self):
         user_gender = self.product_data['users'].loc[self._y_test.index, ['gender']]
-        return self.mrr_at_k_slice(self._y_preds,
-                                   self._y_test,
-                                   user_gender,
-                                   'gender')
+        return self.false_positive_equality_difference(self._y_preds, self._y_test, user_gender, 'gender')
 
     @rec_test('BEING_LESS_WRONG')
     def being_less_wrong(self):
