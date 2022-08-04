@@ -212,6 +212,8 @@ class EvalRSRunner:
                      items=self.dataset.df_tracks)
         # TODO: we should verify the shape of predictions respects top_k=20
         rlist = myRecList(model=model, dataset=dataset)
+        # TODO: there might be some path issues
+        rlist.load_dense_repr(path_to_word_vectors='./song2vec.wv')
         report_path = rlist()
         return report_path
 

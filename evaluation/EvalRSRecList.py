@@ -35,6 +35,15 @@ class EvalRSRecList(RecList):
         # group-by slice and get per-slice mrr
         return rr.groupby(slice_key)['rr'].agg('mean').to_json()
 
+    def false_positives_at_k_slice(self,
+                                   y_preds: pd.DataFrame,
+                                   y_test: pd.DataFrame,
+                                   slice_info: pd.DataFrame,
+                                   slice_key: str):
+        pass
+
+    def cosine_sim(self, u: np.array, v: np.array) -> np.array:
+        return  np.sum(u * v, axis=1) / (np.linalg.norm(u, axis=1) * np.linalg.norm(v, axis=1))
 
     @rec_test('stats')
     def stats(self):
@@ -102,6 +111,21 @@ class EvalRSRecList(RecList):
                                    self._y_test,
                                    user_gender,
                                    'gender')
+
+    @rec_test('BEING_LESS_WRONG')
+    def being_less_wrong(self):
+        from reclist.metrics.standard_metrics import hits_at_k
+
+        hits = hits_at_k(self._y_preds, self._y_test, k=TOP_K_CHALLENGE).max(axis=2)
+        misses = (hits == False)
+        miss_gt_vectors = self._dense_repr[self._y_test.loc[misses, 'track_id'].values.reshape(-1)]
+        # we calculate the score w.r.t to the first prediction
+        miss_pred_vectors = self._dense_repr[self._y_preds.loc[misses, '0'].values.reshape(-1)]
+
+        return float(self.cosine_sim(miss_gt_vectors, miss_pred_vectors).mean())
+    
+        # return self.cosine_distance(miss_gt_vectors, miss_pred_vectors)
+
 
 class EvalRSDataset(RecDataset):
     def load(self, **kwargs):
