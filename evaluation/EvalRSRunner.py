@@ -63,7 +63,7 @@ class ChallengeDataset:
         self.num_folds = num_folds
         self.unique_user_ids_df = self.df_events[['user_id']].drop_duplicates()
         self._random_state = int(time.time()) if not seed else seed
-        self._fold_ids, self._test_set = self._generate_folds(self.num_folds, self._random_state)
+        self._train_set, self._test_set = self._generate_folds(self.num_folds, self._random_state)
 
         print("Generating dataset hashes.")
         self._events_hash = hashlib.sha256(pd.util.hash_pandas_object(self.df_events.sample(n=1000,
@@ -87,7 +87,10 @@ class ChallengeDataset:
     def _k_core_filter(self, df_user_track: pd.DataFrame, k=10):
         num_users_prev, num_tracks_prev = None, None
         delta = True
-        while delta:
+        iter, max_iter = 0, 10
+        valid_users = df_user_track['user_id'].unique()
+        valid_tracks = df_user_track['track_id'].unique()
+        while delta and iter < max_iter:
             track_counts = self._get_vertice_count(df_user_track, 'track_id')
             valid_tracks = track_counts[track_counts['counts']>=k].index
             # keep only valid tracks
@@ -99,12 +102,15 @@ class ChallengeDataset:
 
             num_tracks = len(valid_tracks)
             num_users = len(valid_users)
-
+            # check for any update
             delta = (num_users != num_users_prev) or (num_tracks != num_tracks_prev)
 
             num_users_prev = num_users
             num_tracks_prev = num_tracks
+            iter+=1
 
+            # # DEBUG
+            # print("ITER {}".format(iter))
             # print("THERE ARE {} VALID TRACKS; MIN VERTICES {}".format(len(valid_tracks), track_counts['counts'].min()))
             # print("THERE ARE {} VALID USERS; MIN VERTICES {}".format(len(valid_users), user_counts['counts'].min()))
 
@@ -119,39 +125,44 @@ class ChallengeDataset:
         df_fold_user_ids = pd.concat(fold_ids, axis=1)
 
         test_dfs = []
-        fold_user_ids = []
+        train_dfs_idx = []
         for fold in range(num_folds):
             df_fold_events = self.df_events[self.df_events['user_id'].isin(df_fold_user_ids[fold])]
+            # perform k-core filter; threshold of 10
+            valid_user_ids, valid_track_ids = self._k_core_filter(df_fold_events[['user_id','track_id']], k=10)
 
-            valid_user_ids, valid_track_ids = self._k_core_filter(df_fold_events[['user_id','track_id']])
             df_fold_events = df_fold_events[df_fold_events['user_id'].isin(valid_user_ids)]
             df_fold_events = df_fold_events[df_fold_events['track_id'].isin(valid_track_ids)]
 
             df_groupby = df_fold_events.groupby(by='user_id', as_index=False)
             df_test = df_groupby.sample(n=1, random_state=seed)[['user_id', 'track_id']]
             df_test['fold'] = fold
+            df_train = df_fold_events.index.difference(df_test.index).to_frame(name='index')
+            df_train['fold'] = fold
+
             test_dfs.append(df_test)
-            unique_user_id = pd.DataFrame(df_fold_events['user_id'].unique(), columns=['user_id'])
-            unique_user_id['fold'] = fold
-            fold_user_ids.append(unique_user_id)
+            train_dfs_idx.append(df_train)
+            # unique_user_id = pd.DataFrame(df_fold_events['user_id'].unique(), columns=['user_id'])
+            # unique_user_id['fold'] = fold
+            # fold_user_ids.append(unique_user_id)
 
         df_test = pd.concat(test_dfs, axis=0)
-        df_users = pd.concat(fold_user_ids, axis=0)
+        df_train = pd.concat(train_dfs_idx, axis=0)
 
         # print(df_test)
         # print('====')
         # print(df_users)
         # print('====')
-        return df_users, df_test
+        return df_train, df_test
 
     def _get_train_set(self, fold: int) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
+        train_index =self._train_set[self._train_set['fold']==fold]['index']
+        # test_index = self._test_set[self._test_set['fold']==fold].index
+        # fold_users = self._fold_ids[self._fold_ids['fold']==fold]['user_id']
+        # train_fold = (self.df_events.loc[self.df_events['user_id'].isin(fold_users)])
 
-        test_index = self._test_set[self._test_set['fold']==fold].index
-        fold_users = self._fold_ids[self._fold_ids['fold']==fold]['user_id']
-        train_fold = (self.df_events.loc[self.df_events['user_id'].isin(fold_users)])
-
-        return train_fold.loc[train_fold.index.difference(test_index)]
+        return self.df_events.loc[train_index]
 
     def _get_test_set(self, fold: int, limit: int = None, seed: int =0) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
