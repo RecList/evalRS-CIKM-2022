@@ -97,11 +97,36 @@ Please see the `notebooks` folder for a walk-through on the evaluation engine, a
 
 We prepared a set of quantitative, sliced-based and behavioral tests for the Last.FM use case, inspired by our [previous work](https://reclist.io/) on the topic and the existing literature on fairness, evaluation and biases.
 
-We detail here the individual tests implemented in the `EvalRSRecList` class, and provide some context on why they are chosen and how they are operationalized: of course, feel free to check the code for implementation details.
+We detail here the individual tests implemented in the `EvalRSRecList` class, and provide some context on why they are chosen and how they are operationalized: of course, feel free to check the code for implementation details. Once the evaluaton script obtains the test score for each of the individual test below, a _macro-score_ is automatically calculated for the leaderboard: check the logic for the aggregation below.
 
 ### Individual tests
 
-_TBC_
+In this Data Challenge, you are asked to train a user-item recommendation model: given historical data on users music consumption, your model should recommend the top _k_ songs to a set of test users - generally speaking, given a user U, if the held-out song for U is contained in the top _k_ suggestions, the model has been successful in its predictions.
+
+We now explain in details the tests that we included in `EvalRSRecList` to provide a _rounded_ evaluation of recommender systems. We divide our list in the three subgroups as per [our paper](https://arxiv.org/abs/2207.05772), and explain the motivations behind each.
+
+_Information Retrieval metrics_
+
+* Mean Reciprocal Rank ([MRR](https://en.wikipedia.org/wiki/Mean_reciprocal_rank)): MRR gives a good measure of where the first relevant element is ranked in the output list. Besides being considered a standard rank-aware evaluation metric, we chose MRR as it is particularly simple to compute and to interpret.
+
+_Information Retrieval on a per-group or slice basis_
+
+We are interested in testing models through a number of behavioral tests whose aim is to address a number of known issues for recommender systems, from fairness to robustness. Slices are designed to address a wide spectrum of problems, for instance:  fairness (e.g. your model should have equal outcomes for different groups); robustness (e.g. your model should produce good outcomes for long tail items, such as items with less history or items belonging to less represented categories, etc.); use-cases that are somewhat idiosyncratic to the industry or the use case (e.g. in the case of music, your model should not consistently penalize niche or simply less known artists).
+
+For an overview of fairness in ranking see [Yang and Stoyanovich 2016](https://arxiv.org/pdf/1610.08559.pdf), [Castillo 2019](https://chato.cl/papers/castillo_2018_fairness_in_ranking.pdf), [Zehlike et al. 2021](https://arxiv.org/pdf/2103.14000.pdf); for a discussion about robustness in collaborative recommendations see [O’Mahony 2018](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.13.2238&rep=rep1&type=pdf). For a discussion on specific behavioral testing, with a focus on ecommerce see [Tagliabue et al. 2022](https://arxiv.org/abs/2111.09963). 
+
+Tests based on data slices are all based on Hit Rate (HR), defined as ratio between the number of users for which the correct candidate is included in the prediction list and the total number of users in the test set.
+
+For those tests where the partition of the test set consists of a binary class (see Gender Balance below), the final test score is the difference between the HR obtained on the relevant slice and the HR obtained on the original test set (i.e. the general population). For those tests where the partition of the test set consists of a n-ary class (see Artist Popularity below), the final test score is the difference between the HR obtained on each slice and the the HR obtained on the original test set (i.e. ONE-VS-MANY). 
+
+The slice-based tests considered for the final scores are: 
+
+* _TBC_
+
+
+_Behavioral and qualitative tests_
+
+* "Be less wrong": _TBC_
 
 Please note that the RecList used by the evaluation script may (and actually _should_, since your final code submission requires at least one custom test) contain additonal tests on top of the ones that concur to define the leaderboard score. You can, in fact, extend the RecList with as many tests as you want to write your paper, debug your system, uncover some new data insight: remember, EvalRS is about testing as much as scoring! However, only the tests listed above are the ones included in the leaderboard calculation.
 
