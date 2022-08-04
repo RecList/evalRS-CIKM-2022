@@ -7,9 +7,7 @@ Official Repository for EvalRS @ CIKM 2022: a Rounded Evaluation of Recommender 
 
 ## Overview
 
-*IMPORTANT*: [EvalRS](https://reclist.io/cikm2022-cup/) is a Data Challenge at [CIKM 2022](https://www.cikm2022.org/). This in-progress repository will host the official scripts and rules for the competition, which is planned for August 2022: add your e-mail [to challenge list](https://docs.google.com/forms/d/e/1FAIpQLSfAypzM1mvd79JfRGRbb9QMfXGMoVYosdjU9C4NFEWNSNUZXQ/viewform) to be notified of important events.
-
-This is the official repository for _EvalRS @ CIKM 2022: a Rounded Evaluation of Recommender Systems_. The aim of the challenge is to evaluate recommender systems across a set of important dimensions (accuracy being _one_ of them) through a principled and re-usable sets of abstractions, as provided by [RecList](https://github.com/jacopotagliabue/reclist) 🚀. During CIKM 2022, we will organize a workshop on rounded evaluation for RecSys, inviting all participants to attend, celebrate the winners, share their learnings wth the community and listen to keynotes from renown practitioners in the field.
+This is the official repository for [_EvalRS @ CIKM 2022](https://reclist.io/cikm2022-cup/): a Rounded Evaluation of Recommender Systems_. The aim of the challenge is to evaluate recommender systems across a set of important dimensions (accuracy being _one_ of them) through a principled and re-usable sets of abstractions, as provided by [RecList](https://github.com/jacopotagliabue/reclist) 🚀. During CIKM 2022, we will organize a workshop on rounded evaluation for RecSys, inviting all participants to attend, celebrate the winners, share their learnings wth the community and listen to keynotes from renown practitioners in the field.
 
 Please refer to the appropriate sections below to know how to register for the challenge and how to run the evaluation loop properly. For questions about the prize, the provided scripts and the rules, please join our [Slack](https://join.slack.com/t/nuovaareadila-7ne8814/shared_invite/zt-1ciuzc4cx-Z88wFwguFgD14ylYhGcLzA).
 
@@ -129,7 +127,7 @@ Very easy! If you already have a recommendation model you just need to wrap trai
 
 class MyModel(RecModel):
     
-    def __init__(self, items: pd.DataFrame, top_k: int=20, **kwargs):
+    def __init__(self, items: pd.DataFrame, top_k: int=100, **kwargs):
         super(MyModel, self).__init__()
         self.items = items
         self.top_k = top_k

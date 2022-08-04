@@ -5,7 +5,7 @@ from reclist.abstractions import RecModel
 
 class MyModel(RecModel):
     
-    def __init__(self, items: pd.DataFrame, top_k: int=20, **kwargs):
+    def __init__(self, items: pd.DataFrame, top_k: int=100, **kwargs):
         super(MyModel, self).__init__()
         self.items = items
         self.top_k = top_k

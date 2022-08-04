@@ -33,7 +33,7 @@ First, you should inherit `RecModel` and implement the `train` method: `train` s
 
 Second, when the training is done, you should wrap your predictions in a method `predict`: `train` should store the trained model inside the class, and `predict` will use that model to provide predictions. The `predict` method accepts as input a dataframe of all the user IDs for which the model is asked to make a prediction on.
 
-For each `user_id`, we expect `k` predictions (where `k=20` for the competition): you can play around with different Ks for debugging purposes _but_ only `k=20` will be accepted for the leaderboard. [The expected prediction output is a dataframe](../images/prediction.jpg) with `user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank). In addition, it is expected that the predictions are in the same order as the `user_id` in the input dataframe. An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, the empty columns should be filled with `-1`. 
+For each `user_id`, we expect `k` predictions (where `k=100` for the competition): you can play around with different Ks for debugging purposes _but_ only `k=100` will be accepted for the leaderboard. [The expected prediction output is a dataframe](../images/prediction.jpg) with `user_id` as index and k columns, each representing the ranked recommendations (0th column being the highest rank). In addition, it is expected that the predictions are in the same order as the `user_id` in the input dataframe. An example of the desired dataframe format for `n` `user_ids` and `k` predictions per user is seen in the table below. Note that if your model provides less than `k` predictions for a given `user_id`, the empty columns should be filled with `-1`. 
 
  |           |  0          | ...        | k-1         | 
 | ---------- | ----------  | ---------- | ----------- |
@@ -51,7 +51,7 @@ _Implementing the class, and returning the trained model in the proper wrapper:_
 
 class MyModel(RecModel):
     
-    def __init__(self, items: pd.DataFrame, top_k: int=20, **kwargs):
+    def __init__(self, items: pd.DataFrame, top_k: int=100, **kwargs):
         super(MyModel, self).__init__()
         self.items = items
         self.top_k = top_k
@@ -110,7 +110,9 @@ _Information Retrieval metrics_
 
 * Mean Reciprocal Rank ([MRR](https://en.wikipedia.org/wiki/Mean_reciprocal_rank)): MRR gives a good measure of where the first relevant element is ranked in the output list. Besides being considered a standard rank-aware evaluation metric, we chose MRR as it is particularly simple to compute and to interpret.
 
-_Information Retrieval on a per-group or slice basis_
+* Recall at k (k=100): _Recall at k_ is the proportion of relevant items found in the top-k recommendations. Together with MRR, it is also a standard evaluation metric for Information Retrieval.
+
+_Information Retrieval metrics on a per-group or slice basis_
 
 We are interested in testing models through a number of behavioral tests whose aim is to address a number of known issues for recommender systems, from fairness to robustness. Slices are designed to address a wide spectrum of problems, for instance:  fairness (e.g. your model should have equal outcomes for different groups); robustness (e.g. your model should produce good outcomes for long tail items, such as items with less history or items belonging to less represented categories, etc.); use-cases that are somewhat idiosyncratic to the industry or the use case (e.g. in the case of music, your model should not consistently penalize niche or simply less known artists).
 
