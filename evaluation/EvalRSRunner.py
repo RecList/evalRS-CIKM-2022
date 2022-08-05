@@ -296,7 +296,7 @@ class EvalRSRunner:
             'reclist_reports': raw_results,
             'results': agg_results,
             'hash': hash(self),
-            'score': leaderboard_score
+            'SCORE': leaderboard_score
         }
 
         if self.email:

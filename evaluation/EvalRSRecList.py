@@ -65,7 +65,7 @@ class EvalRSRecList(RecList):
 
 
     def cosine_sim(self, u: np.array, v: np.array) -> np.array:
-        return  np.sum(u * v, axis=1) / (np.linalg.norm(u, axis=1) * np.linalg.norm(v, axis=1))
+        return  np.sum(u * v, axis=-1) / (np.linalg.norm(u, axis=-1) * np.linalg.norm(v, axis=-1))
 
     @rec_test('stats')
     def stats(self):
@@ -110,7 +110,7 @@ class EvalRSRecList(RecList):
 
         return self.false_positive_equality_difference(self._y_preds,self._y_test, user_activity, 'bins')
 
-    @rec_test('FPED_TACK_POPULARITY')
+    @rec_test('FPED_TRACK_POPULARITY')
     def fped_track_popularity(self):
         bins = np.array([10, 100, 1000, 10000, 100000])
         track_id = self._y_test['track_id']
@@ -153,8 +153,26 @@ class EvalRSRecList(RecList):
         miss_pred_vectors = self._dense_repr[self._y_preds.loc[misses, '0'].values.reshape(-1)]
 
         return float(self.cosine_sim(miss_gt_vectors, miss_pred_vectors).mean())
-    
-        # return self.cosine_distance(miss_gt_vectors, miss_pred_vectors)
+
+    @rec_test('LATENT_DIVERSITY')
+    def latent_diversity(self):
+        from reclist.metrics.standard_metrics import hits_at_k
+        # there maybe be < K predictions
+        num_inputs = self._y_preds.shape[0]
+        pred_vector_mask = self._y_preds.isin(list(self._dense_repr.key_to_index.keys())).values          # N x K
+        dummy_key = next(iter(self._dense_repr.key_to_index))
+        # make copy of pred
+        preds = self._y_preds.copy()
+        # fill missing/invalid pred with dummy variable
+        preds = preds.where(pred_vector_mask, other=dummy_key)
+        # grab vectors
+        pred_vectors = self._dense_repr[preds.values.reshape(-1)].reshape(num_inputs, TOP_K_CHALLENGE, -1)  # N x K x D
+        pred_vectors = pred_vectors * pred_vector_mask[:, :, None]                                          # N x K x D
+        mean_pred_vector = np.sum(pred_vectors, axis=1) / pred_vector_mask.sum(axis=1, keepdims=True)       # N x D
+        distance_to_mean = 1-self.cosine_sim(mean_pred_vector[:, None, :], pred_vectors)                    # N x K
+        mean_abs_distance = np.sum(np.abs(distance_to_mean * pred_vector_mask), axis=1) / pred_vector_mask.sum(axis=1)
+
+        return float(mean_abs_distance.mean())
 
 
 class EvalRSDataset(RecDataset):
