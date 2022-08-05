@@ -1,44 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ## Tutorial for the EvalRS competition
-# # Retrieval models with Merlin
-# 
-# In this notebook, we present a tutorial on how to use the open-source [NVIDIA Merlin](https://github.com/NVIDIA-Merlin/) framework to build and train a retrieval model for EvalRS competition. We are going to use the [NVTabular](https://github.com/NVIDIA-Merlin/NVTabular) library for preprocessing and [Merlin Models](https://github.com/NVIDIA-Merlin/models) for building and training Tensorflow-based retrieval models.
-# 
-# ### Retrieval models
-# Retrieval models are recsys scalable models that are able to retrieve a large number of candidate items for recommendation. They are typically used in two-stage recsys pipelines, where the retrieval stage scores hundreds of thousands or millions of items and then the ranking stage scores the candidate items with more features or with a more powerful architecture.
-# For ML-based candidate retrieval model, as it needs to quickly score millions of items for a given user, the retrieval models typically produce recommendation scores by just computing the dot product between user and item representations. Popular choices of such models are Matrix Factorization, which learns low-rank user and item embeddings, and the Two-Tower architecture, which is a neural network with two MLP towers where both user and item features are fed to generate user and item embeddings in the output.
-
-# In[ ]:
-
-
-# ## Setup
-
-# In[ ]:
-
-
-# Installs EvalRS dependencies
-#!pip install -r ../../requirements.txt
-# Installs Merlin dependencies
-#!pip install -r requirements.txt
-
-
-# _Basic imports, read the credentials from the env file_
-
-# In[ ]:
+### Script version of the Merlin notebook, useful for remote execution ###
+### Refer to the notebook for a fully commented version, this is just a stripped down version ###
 
 
 import os
 import sys
 import shutil
-# Imports EvalRS dependencies
 sys.path.insert(0, '../../')
 
-
-# In[ ]:
-
-
+import time
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
@@ -51,35 +23,15 @@ BUCKET_NAME = os.getenv('BUCKET_NAME') # you received it in your e-mail
 PARTICIPANT_ID = os.getenv('PARTICIPANT_ID') # you received it in your e-mail
 AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY') # you received it in your e-mail
 AWS_SECRET_KEY = os.getenv('AWS_SECRET_KEY') # you received it in your e-mail
-
-
-# _Specify some other global variables to improve local iteration and debugging, for example setting a LIMIT to work with a smaller, faster test set_
-
-# In[ ]:
-
-
 LIMIT = 0
-
-
-# _NOTE: as long as there is a limit specified, the runner won't upload results: make sure to have LIMIT=0 when you want to submit to the leaderboard!_
-
-# In[ ]:
-
-
 from evaluation.EvalRSRunner import EvalRSRunner
 from evaluation.EvalRSRunner import ChallengeDataset
 from reclist.abstractions import RecModel
 
-
-# In[ ]:
-
+# start the timer
+START_TIME = time.time()
 
 dataset = ChallengeDataset(force_download=False)  # note, if YES, the dataset will be donwloaded again
-
-
-# In[ ]:
-
-
 runner = EvalRSRunner(
     dataset=dataset,
     aws_access_key_id=AWS_ACCESS_KEY,
@@ -89,21 +41,10 @@ runner = EvalRSRunner(
     email=EMAIL
     )
 
-
-# ## Creates a retrieval recsys pipeline with Merlin
-
-# In[ ]:
-
-
 import nvtabular as nvt
 import nvtabular.ops as ops
 from merlin.dag import ColumnSelector
 from merlin.schema import Schema, Tags
-
-
-# In[ ]:
-
-
 import merlin.models.tf as mm
 from merlin.io import Dataset
 from merlin.models.tf.dataset import BatchedDataset
@@ -112,9 +53,6 @@ from merlin.models.utils import schema_utils
 from merlin.models.tf.core.transformations import PopularityLogitsCorrection
 import tensorflow as tf
 from tensorflow.keras import regularizers
-
-
-# In[ ]:
 
 
 def get_item_frequencies(train_ds):   
@@ -156,20 +94,6 @@ def get_item_frequencies(train_ds):
     )
 
     return item_frequencies
-
-
-# Here we define our model for EvalRS by inheriting from the RecModel, which must implement the `train()` and the `predict()` methods. Within `train()` we need to define our full pipeline for preprocessing and training data. 
-# 
-# #### NVTabular
-# For preprocessing, we use the [NVTabular](https://github.com/NVIDIA-Merlin/NVTabular) library, which provides very handful features for common operations like (label) encoding categorical features for embeddings and for normalizing continuous features.
-# NVTabular works with CPUs, uses GPUs and NVIDIA RAPIDS when available for GPU-accelerated preprocessing. For this example we are installing NVTabular using `pip` for CPU usage, but if you want to speedup preprocessing with GPUs you can install NVTabular using `conda` as explained in its [repo](https://github.com/NVIDIA-Merlin/NVTabular).
-# 
-# #### Merlin Models
-# For model definition and training we use [Merlin Models](https://github.com/NVIDIA-Merlin/models). It provides a Tensorflow (Keras) API where you can easily build state-of-the-art retrieval and ranking models. One of the core ideas of Models is to leverage the schema generated during preprocessing by **NVTabular** to create automatically the necessary embedding tables for categorical features and define the target of the model.
-# Here we will be implementing two retrieval models: `MatrixFactorizationModel` and `TwoTowerModel`. You can find more information about retrieval with Merlin Models in this [example notebook](https://github.com/NVIDIA-Merlin/models/blob/main/examples/05-Retrieval-Model.ipynb).
-
-# In[ ]:
-
 
 class MyRetrievalModel(RecModel):
     
@@ -410,10 +334,7 @@ class MyRetrievalModel(RecModel):
         return raw_topk_predicted_item_ids
 
 
-# ## Matrix Factorization
-
-# In[ ]:
-
+# Matrix Factorization
 
 class MyMFModel(MyRetrievalModel):
     
@@ -428,10 +349,6 @@ class MyMFModel(MyRetrievalModel):
         )
         
         return model
-
-
-# In[ ]:
-
 
 mf_model = MyMFModel(
     items_df=dataset.df_tracks,
@@ -452,25 +369,14 @@ mf_model = MyMFModel(
     mf_dim=128,
 )
 
-
-# _Finally, we run the evaluation code: remember, if LIMIT is not 0, your submission won't be uploaded but the loop may still be useful for you to debug / iterate locally_
-
-# In[ ]:
-
-
 runner.evaluate(model=mf_model, limit=LIMIT)
 
+END_TIME = time.time()
+print(f"Matrix factorization took {(END_TIME-START_TIME) / 60} minutes!")
 
-# ## Two-tower architecture
+START_TIME = time.time()
 
-# A Two-Tower Model consists of item (candidate) and user (query) encoder towers. With two towers, the model can learn representations (embeddings) for queries and candidates separately.
-# 
-# <img src="./images/TwoTower.png"  width="30%">
-# 
-# Image Adapted from: [Off-policy Learning in Two-stage Recommender Systems](https://dl.acm.org/doi/abs/10.1145/3366423.3380130)"
-
-# In[ ]:
-
+# Two-tower architecture
 
 class MyTwoTowerModel(MyRetrievalModel):
     
@@ -497,10 +403,6 @@ class MyTwoTowerModel(MyRetrievalModel):
 
         return model
 
-
-# In[ ]:
-
-
 tt_model = MyTwoTowerModel(
     items_df=dataset.df_tracks,
     users_df=dataset.df_users,
@@ -525,21 +427,8 @@ tt_model = MyTwoTowerModel(
 )
 
 
-# _Finally, we run the evaluation code: remember, if LIMIT is not 0, your submission won't be uploaded but the loop may still be useful for you to debug / iterate locally_
-
-# In[ ]:
-
-
 runner.evaluate(model=tt_model, limit=LIMIT)
 
-
-# ## Conclusion
-
-# In this notebook you have learned how build retrieval models (MF, Two-Tower) with the [Merlin](https://github.com/NVIDIA-Merlin/) open-source framework for the EvalRS competition. 
-# Feel free to improve these models using Tensorflow/Keras.
-
-# In[ ]:
-
-
-
+END_TIME = time.time()
+print(f"Two tower took {(END_TIME-START_TIME) / 60} minutes!")
 
