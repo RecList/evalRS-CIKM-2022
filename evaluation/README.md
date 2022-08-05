@@ -112,7 +112,8 @@ _Information Retrieval metrics_
 
 * Mean Reciprocal Rank ([MRR](https://en.wikipedia.org/wiki/Mean_reciprocal_rank)): MRR gives a good measure of where the first relevant element is ranked in the output list. Besides being considered a standard rank-aware evaluation metric, we chose MRR as it is particularly simple to compute and to interpret.
 
-* Recall at k (k=100): _Recall at k_ is the proportion of relevant items found in the top-k recommendations. Together with MRR, it is also a standard evaluation metric for Information Retrieval.
+* Hit Ratio (HR): Recall at k (k=100) is the proportion of relevant items found in the top-k recommendations. Together with MRR, it is also a standard evaluation metric for Information Retrieval.
+
 
 _Information Retrieval metrics on a per-group or slice basis_
 
