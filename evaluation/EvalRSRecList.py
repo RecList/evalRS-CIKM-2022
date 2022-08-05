@@ -96,8 +96,6 @@ class EvalRSRecList(RecList):
         y_test_valid = self._y_test[valid_country_mask]
         user_countries = user_countries[valid_country_mask]
 
-        print(y_test_valid.shape, y_test_valid.shape)
-
         return self.false_positive_equality_difference(y_pred_valid, y_test_valid, user_countries, 'country')
 
     @rec_test('FPED_USER_ACTIVITY')
