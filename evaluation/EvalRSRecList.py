@@ -63,9 +63,8 @@ class EvalRSRecList(RecList):
         res = fpr_per_slice.to_dict()
         return {'fped': fped, 'fpr': fpr, **res}
 
-
     def cosine_sim(self, u: np.array, v: np.array) -> np.array:
-        return  np.sum(u * v, axis=-1) / (np.linalg.norm(u, axis=-1) * np.linalg.norm(v, axis=-1))
+        return np.sum(u * v, axis=-1) / (np.linalg.norm(u, axis=-1) * np.linalg.norm(v, axis=-1))
 
     @rec_test('stats')
     def stats(self):
@@ -77,13 +76,13 @@ class EvalRSRecList(RecList):
         }
 
     @rec_test('HIT_RATE')
-    def hit_rate_at_20(self):
+    def hit_rate_at_100(self):
         from reclist.metrics.standard_metrics import hit_rate_at_k
         hr = hit_rate_at_k(self._y_preds, self._y_test, k=TOP_K_CHALLENGE)
         return hr
 
     @rec_test('MRR')
-    def mrr_at_20(self):
+    def mrr_at_100(self):
         from reclist.metrics.standard_metrics import mrr_at_k
         return mrr_at_k(self._y_preds, self._y_test, k=TOP_K_CHALLENGE)
 
@@ -156,23 +155,28 @@ class EvalRSRecList(RecList):
 
     @rec_test('LATENT_DIVERSITY')
     def latent_diversity(self):
-        from reclist.metrics.standard_metrics import hits_at_k
-        # there maybe be < K predictions
-        num_inputs = self._y_preds.shape[0]
-        pred_vector_mask = self._y_preds.isin(list(self._dense_repr.key_to_index.keys())).values          # N x K
-        dummy_key = next(iter(self._dense_repr.key_to_index))
         # make copy of pred
         preds = self._y_preds.copy()
+        num_inputs = preds.shape[0]
+        # there maybe be < K predictions
+        pred_vector_mask = self._y_preds.isin(list(self._dense_repr.key_to_index.keys())).values            # N x K
         # fill missing/invalid pred with dummy variable
+        dummy_key = next(iter(self._dense_repr.key_to_index))
         preds = preds.where(pred_vector_mask, other=dummy_key)
         # grab vectors
-        pred_vectors = self._dense_repr[preds.values.reshape(-1)].reshape(num_inputs, TOP_K_CHALLENGE, -1)  # N x K x D
-        pred_vectors = pred_vectors * pred_vector_mask[:, :, None]                                          # N x K x D
+        pred_vectors = self._dense_repr[preds.values[:,:20].reshape(-1)].reshape(num_inputs, 20, -1)        # N x K x D
+        # mask vectors
+        pred_vectors = pred_vectors * pred_vector_mask[:, :20, None]                                        # N x K x D
+        # compute mean pred vector
         mean_pred_vector = np.sum(pred_vectors, axis=1) / pred_vector_mask.sum(axis=1, keepdims=True)       # N x D
+        # computre distances to mean vector and average
         distance_to_mean = 1-self.cosine_sim(mean_pred_vector[:, None, :], pred_vectors)                    # N x K
-        mean_abs_distance = np.sum(np.abs(distance_to_mean * pred_vector_mask), axis=1) / pred_vector_mask.sum(axis=1)
-
-        return float(mean_abs_distance.mean())
+        mean_distance = np.sum(distance_to_mean * pred_vector_mask[:,:20], axis=1) / pred_vector_mask[:,:20].sum(axis=1)
+        # compute bias distance
+        gt_vectors = self._dense_repr[self._y_test['track_id'].values.reshape(-1)]
+        bias_distance = 1-self.cosine_sim(mean_pred_vector, gt_vectors)
+        # weight diversity and correctness importance
+        return float((0.3*mean_distance-0.7*bias_distance).mean())
 
 
 class EvalRSDataset(RecDataset):
