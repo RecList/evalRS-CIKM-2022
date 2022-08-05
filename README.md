@@ -7,11 +7,11 @@ Official Repository for EvalRS @ CIKM 2022: a Rounded Evaluation of Recommender 
 
 ## Overview
 
-This is the official repository for [EvalRS @ CIKM 2022](https://reclist.io/cikm2022-cup/): _a Rounded Evaluation of Recommender Systems_. The aim of the challenge is to evaluate recommender systems across a set of important dimensions (accuracy being _one_ of them) through a principled and re-usable sets of abstractions, as provided by [RecList](https://github.com/jacopotagliabue/reclist) 🚀. During CIKM 2022, we will organize a workshop on rounded evaluation for RecSys, inviting all participants to attend, celebrate the winners, share their learnings wth the community and listen to keynotes from renown practitioners in the field.
+This is the official repository for [EvalRS @ CIKM 2022](https://reclist.io/cikm2022-cup/): _a Rounded Evaluation of Recommender Systems_. The aim of the challenge is to evaluate recommender systems across a set of important dimensions (accuracy being _one_ of them) through a principled and re-usable sets of abstractions, as provided by [RecList](https://github.com/jacopotagliabue/reclist) 🚀. 
+
+During CIKM 2022, we will organize a workshop on rounded evaluation for RecSys, inviting all participants to attend, celebrate the winners, share their learnings wth the community and listen to keynotes from renown practitioners in the field.
 
 Please refer to the appropriate sections below to know how to register for the challenge and how to run the evaluation loop properly. For questions about the prize, the provided scripts and the rules, please join our [Slack](https://join.slack.com/t/nuovaareadila-7ne8814/shared_invite/zt-1ciuzc4cx-Z88wFwguFgD14ylYhGcLzA).
-
-_We are working hard on this: check back often for updates._
 
 ### Important dates
 
