@@ -110,6 +110,20 @@ class EvalRSRecList(RecList):
 
         return self.false_positive_equality_difference(self._y_preds,self._y_test, user_activity, 'bins')
 
+    @rec_test('FPED_TACK_POPULARITY')
+    def fped_track_popularity(self):
+        bins = np.array([10, 100, 1000, 10000, 100000])
+        track_id = self._y_test['track_id']
+        track_activity = self._x_train[self._x_train['track_id'].isin(track_id)]
+        track_activity = track_activity.groupby('track_id', as_index=True, sort=False)[['user_track_count']].sum()
+        track_activity = track_activity.loc[track_id]
+
+        track_activity['bin_index'] = np.digitize(track_activity.values.reshape(-1), bins)
+        track_activity['bins'] = bins[track_activity['bin_index'].values - 1]
+
+        return self.false_positive_equality_difference(self._y_preds, self._y_test, track_activity, 'bins')
+
+
     @rec_test('FPED_ARTIST_POPULARITY')
     def fped_artist_popularity(self):
         bins = np.array([10, 100, 1000, 10000, 100000])

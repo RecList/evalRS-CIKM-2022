@@ -18,7 +18,7 @@ from reclist.abstractions import RecList
 from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
 from collections import defaultdict
 from evaluation.utils import download_with_progress, get_cache_directory, LFM_DATASET_PATH, decompress_zipfile, \
-    upload_submission, TOP_K_CHALLENGE
+    upload_submission, TOP_K_CHALLENGE, LEADERBOARD_TESTS
 
 
 class ChallengeDataset:
@@ -216,6 +216,10 @@ class EvalRSRunner:
         report_path = rlist()
         return report_path
 
+    # simple mean for now
+    def _aggregate_scores(self, agg_test_results: dict) -> float:
+        return np.mean(list(agg_test_results.values()))
+
     def evaluate(
             self,
             model,
@@ -251,6 +255,9 @@ class EvalRSRunner:
             assert self.bucket_name
 
         fold_results_path = []
+        # perform training and evaluation for each fold
+        # results are automatically stored by reclist to a local path
+        # store local path into list
         for fold in range(num_folds):
             train_df = self.dataset._get_train_set(fold=fold)
             if debug:
@@ -267,32 +274,36 @@ class EvalRSRunner:
         for fold, results_path in enumerate(fold_results_path):
             with open(os.path.join(results_path, 'results', 'report.json')) as f:
                 result = json.load(f)
-            # save reclist output
+            # save raw reclist output
             raw_results.append(result)
-            # tests which we care about
-            tests = ['HIT_RATE']
-            # extract test results
+            # extract tests results which we care about
             for test_data in result['data']:
-                if test_data['test_name'] in tests:
-                    fold_results[test_data['test_name']].append(test_data['test_result'])
-
-        # compute means
-        # TODO: CI computation
+                if test_data['test_name'] in LEADERBOARD_TESTS:
+                    if isinstance(test_data['test_result'], dict) and 'fped' in test_data['test_result']:
+                        fold_results[test_data['test_name']].append(test_data['test_result']['fped'])
+                    else:
+                        fold_results[test_data['test_name']].append(test_data['test_result'])
+        print(json.dumps(fold_results, indent=2))
+        # compute means for each test over fold
         agg_results = {test: np.mean(res) for test, res in fold_results.items()}
+        # generate single score
+        leaderboard_score = self._aggregate_scores(agg_results)
+        print("LEADERBOARD SCORE : {}".format(leaderboard_score))
+
+        # TODO: CI computation ?
         # build final output dict
         out_dict = {
             'reclist_reports': raw_results,
             'results': agg_results,
-            'hash': hash(self)
+            'hash': hash(self),
+            'score': leaderboard_score
         }
-        # TODO: dump data somewhere better?
-        if self.email:
 
+        if self.email:
             local_file = '{}_{}.json'.format(self.email.replace('@', '_'), int(time.time() * 10000))
             with open(local_file, 'w') as outfile:
                 json.dump(out_dict, outfile, indent=2)
-            print('SUBMISSION RESULTS SAVE TO {}'.format(local_file))
-
+            print('SUBMISSION RESULTS SAVED TO {}'.format(local_file))
             if upload:
                 upload_submission(local_file,
                                   aws_access_key_id=self.aws_access_key_id,
