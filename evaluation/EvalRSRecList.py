@@ -42,7 +42,7 @@ class EvalRSRecList(RecList):
                                    slice_key: str):
         from reclist.metrics.standard_metrics import false_positives_at_k
         # get false positives
-        fp = false_positives_at_k(y_preds, self._y_test, k=TOP_K_CHALLENGE).min(axis=2)
+        fp = false_positives_at_k(y_preds, y_test, k=TOP_K_CHALLENGE).min(axis=2)
         # convert to dataframe
         fp = pd.DataFrame(fp, columns=['fp'], index=y_test.index)
         # grab slice info
@@ -89,8 +89,16 @@ class EvalRSRecList(RecList):
 
     @rec_test('FPED_COUNTRY')
     def fped_country(self):
-        user_countries = self.product_data['users'].loc[self._y_test.index, ['country']]
-        return self.false_positive_equality_difference(self._y_preds, self._y_test, user_countries, 'country')
+        country_list = ["US", "RU", "DE", "UK", "PL", "BR", "FI", "NL", "ES", "SE", "UA", "CA", "FR", "NaN"]
+        user_countries = self.product_data['users'].loc[self._y_test.index, ['country']].fillna('NaN')
+        valid_country_mask = user_countries['country'].isin(country_list)
+        y_pred_valid = self._y_preds[valid_country_mask]
+        y_test_valid = self._y_test[valid_country_mask]
+        user_countries = user_countries[valid_country_mask]
+
+        print(y_test_valid.shape, y_test_valid.shape)
+
+        return self.false_positive_equality_difference(y_pred_valid, y_test_valid, user_countries, 'country')
 
     @rec_test('FPED_USER_ACTIVITY')
     def fped_user_activity(self):
