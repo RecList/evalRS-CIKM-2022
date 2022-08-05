@@ -1,3 +1,5 @@
 tensorflow>=2.8
 git+https://github.com/NVIDIA-Merlin/core
 merlin-models
+nvtabular==1.2.2
+numpy==1.22
