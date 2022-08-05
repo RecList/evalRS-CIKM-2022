@@ -100,6 +100,8 @@ We prepared a set of quantitative, sliced-based and behavioral tests for the Las
 
 We detail here the individual tests implemented in the `EvalRSRecList` class, and provide some context on why they are chosen and how they are operationalized: of course, feel free to check the code for implementation details. Once the evaluaton script obtains the test score for each of the individual test below, a _macro-score_ is automatically calculated for the leaderboard: check the logic for the aggregation below.
 
+Please note when you install the `requirements.txt` you will automatically get the appropriate beta version of [RecList](https://reclist.io/), needed to properly run this code.
+
 ### Individual tests
 
 In this Data Challenge, you are asked to train a user-item recommendation model: given historical data on users music consumption, your model should recommend the top _k_ songs to a set of test users - generally speaking, given a user U, if the held-out song for U is contained in the top _k_ suggestions, the model has been successful in its predictions.
@@ -124,12 +126,21 @@ For those tests where the partition of the test set consists of a binary class (
 
 The slice-based tests considered for the final scores are: 
 
-* _TBC_
+* **Gender balance**. This test is meant to address fairness towards gender, since it is a known problem for recommender systems [Saxena and Jein 2020](https://arxiv.org/abs/2112.02530). Since, the dataset only provides binary gender, in this test you will be asked to minimize the difference between the HR obtained on users who declared Female as gender and the HR obtained on the original test set. We operationalize this test as the smaller the difference, the fairer the model towards potential gender biases. For this you will be asked to minimize this number.
 
+* **Artist popularity**. This test is meant to address a known problem in music recommendation: recommender systems often penalize niche or simply less known artists and users who are less interested in very popular content [Kowald et al. 2020](https://link.springer.com/chapter/10.1007/978-3-030-45442-5_5), [Celma and Cano 2008](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.168.5009&rep=rep1&type=pdf). This is particularly important since several important music streaming services (e.g. [Spotify](https://open.spotify.com/), [Tidal](https://tidal.com/)) also act as marketplaces where artists promote their music. In this case, since splitting the testset into two would draw an arbitrary line between popular vs. unpopular artists, failing to capture the actual properties of the distribution, we divided the test set through logarithmic bucketing (i.e. logarithmic bins in base 10). This test is therefore an example of n-ary partition of the test set. Consequently you will be asked to compute the difference between the HR obtained on each slice and the the HR obtained on the original test set (i.e. ONE-VS-MANY); the final number representing your model’s score on the test will be the mean of all the values obtained.
+
+* **User country**. Music consumption is subject to many country dependent factors, such as language differences, local sub-genres and styles, local licensing and distribution laws, cultural influences of local traditional music, etc. Since, as some argued, digitization has led to more diverse cultural markets [Bello and Garcia 2021](https://www.nature.com/articles/s41599-021-00855-1), these factors have deep implications for how people listen to music, how artists, labels and streaming platforms go to market. In this test, we sliced the test set selecting the top-10 countries based on the number of users.
+
+* **Song popularity**. This test is meant to make sure that your model performs adequately both on most-listened tracks and on songs with fewer listening events. In this category you will find both less popular songs and newer songs and therefore the test is designed to address both robustness to long tail items and cold-start scenarios. Also in this case, to avoid setting an arbitrary threshold for popularity, we used logarithmic bucketing in base 10 to divide the test set into bins. 
+
+* **User history**. Users with a long history vs. users with a short history. The test can be viewed as a robustness/cold-start test. Artist history is operationalized in terms of user play counts (i.e. the sum of play counts per artist). Also in this case, to avoid setting an arbitrary threshold for popularity, we used logarithmic bucketing in base 10 to divide the test set into bins. 
 
 _Behavioral and qualitative tests_
 
-* "Be less wrong": _TBC_
+* **Be less wrong**. It is important that recommender systems maintain a reasonable standard of relevance even when the predictions are not accurate. For instance, let’s say that the ground truth for a recommendation is the rap song, _‘Humble’_ by Kendric Lamar and that our recommendation system does not get it right. Now our recommender might recommend another rap song from the same year, such as _‘The story of O.J.’_ by Jay-Z, or it might recommend a famous pop song from the top chart of that year, such as _‘Shape of You’_ by Ed Sheeran. There is still a substantial difference between these two as the first one is closer to the ground truth than the second. Since this has a great impact on the overall user experience, it is desirable that models test and measure their performance scenarios like the one just described. In this test, you will be asked to use the latent space of tracks and to report the average distance between the embeddings of the items chosen by your model and those of the ground truth items. Distance is measured in terms of cousin similarly.
+
+* **Latent diversity**: _TBC_
 
 Please note that the RecList used by the evaluation script may (and actually _should_, since your final code submission requires at least one custom test) contain additonal tests on top of the ones that concur to define the leaderboard score. You can, in fact, extend the RecList with as many tests as you want to write your paper, debug your system, uncover some new data insight: remember, EvalRS is about testing as much as scoring! However, only the tests listed above are the ones included in the leaderboard calculation.
 
