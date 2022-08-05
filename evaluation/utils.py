@@ -22,7 +22,7 @@ LFM_DATASET_PATH="https://cikm-evalrs-dataset.s3.us-west-2.amazonaws.com/evalrs_
 TOP_K_CHALLENGE = 100
 LEADERBOARD_TESTS = [
     'MRR', 'BEING_LESS_WRONG', 'FPED_COUNTRY', 'FPED_USER_ACTIVITY',
-    'FPED_TRACK_ACTIVITY','FPED_ARTIST_POPULARITY', 'FPED_GENDER'
+    'FPED_TRACK_ACTIVITY','FPED_ARTIST_POPULARITY', 'FPED_GENDER', 'LATENT_DIVERSITY'
 ]
 
 def download_with_progress(url, destination):
