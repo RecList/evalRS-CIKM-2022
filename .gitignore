@@ -137,3 +137,5 @@ upload.env
 .DS_Store
 
 .reclist/
+
+categories/
