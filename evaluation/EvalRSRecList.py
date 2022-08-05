@@ -110,7 +110,7 @@ class EvalRSRecList(RecList):
 
         return self.false_positive_equality_difference(self._y_preds,self._y_test, user_activity, 'bins')
 
-    @rec_test('FPED_TACK_POPULARITY')
+    @rec_test('FPED_TRACK_POPULARITY')
     def fped_track_popularity(self):
         bins = np.array([10, 100, 1000, 10000, 100000])
         track_id = self._y_test['track_id']
