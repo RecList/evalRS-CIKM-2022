@@ -47,7 +47,7 @@ _Historical Interactions_: a collection of interactions between users and tracks
 
 ![http://www.cp.jku.at/datasets/LFM-1b/](images/training.png)
 
-For in-depth explanations on the code and the template scripts, see the instructions below and check the provided examples and tutorials in `notebooks` and `baselines`.
+For in-depth explanations on the code and the template scripts, see the instructions below and check the provided examples and tutorials in `notebooks`.
 
 For information on how the original dataset was built and what meta-data are available, please refer to [this paper](http://www.cp.jku.at/people/schedl/Research/Publications/pdf/schedl_ijmir_2017.pdf).
 
@@ -113,9 +113,11 @@ P.s.: if something in the procedure goes wrong, please contact us through Slack!
 
 A valid submission script can be obtained by copying into your repository `submission.py`, and modify `MyModel.py` to use your logic instead of the default (random) one. Your submission is required to build an instance of a `RecModel`, providing an implementation for the `train` and `predict` methods.
 
-In the `evaluation` folder, we included a [lenghtier explanation of the evaluation methodology](/evaluation/README.md) involved in this challenge; in the `notebooks` folder, we include a step-by-step, heavily commented guide on how to build a submission, including sample data points and an example of using a derived RecList for evaluation. A [Kaggle notebook](https://www.kaggle.com/code/vinidd/cikm-data-challenge) is also available. 
+In the `evaluation` folder, we included a [lenghtier explanation of the evaluation methodology](/evaluation/README.md) involved in this challenge; in the `notebooks` folder, we include a step-by-step, heavily commented guide on how to build a submission, including sample data points and an example of using a derived RecList for evaluation. A [Kaggle notebook](https://www.kaggle.com/code/vinidd/cikm-data-challenge) is also available. The EDA notebook showcases some important features of the dataset, and provide a start for exploring the problem - the picture below shows music consumption by hour of day for example:
 
-In the `baselines` folder, you will find more complex models than the simple random one. Remember: this competition is about models as much as about _data_ and _testing_ - take our initial work just as an inspiration!
+![Chart for EDA](images/chart.png)
+
+In the `merlin_tutorial` folder inside `notebooks`, you will find more complex models than the simple random one, with a specific set of dependencies in case you wish to run them. Remember: this competition is about models as much as about _data_ and _testing_ - take our initial work just as an inspiration!
 
 Please refer to the provided examples for in-depth explanations, and don't forget to reach out on Slack if you have any doubt.
 
