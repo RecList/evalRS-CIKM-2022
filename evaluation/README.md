@@ -100,6 +100,8 @@ We prepared a set of quantitative, sliced-based and behavioral tests for the Las
 
 We detail here the individual tests implemented in the `EvalRSRecList` class, and provide some context on why they are chosen and how they are operationalized: of course, feel free to check the code for implementation details. Once the evaluaton script obtains the test score for each of the individual test below, a _macro-score_ is automatically calculated for the leaderboard: check the logic for the aggregation below.
 
+Please note when you install the `requirements.txt` you will automatically get the appropriate beta version of [RecList](https://reclist.io/), needed to properly run this code.
+
 ### Individual tests
 
 In this Data Challenge, you are asked to train a user-item recommendation model: given historical data on users music consumption, your model should recommend the top _k_ songs to a set of test users - generally speaking, given a user U, if the held-out song for U is contained in the top _k_ suggestions, the model has been successful in its predictions.
