@@ -2,6 +2,7 @@
 Official Repository for EvalRS @ CIKM 2022: a Rounded Evaluation of Recommender Systems
 
 <a href="https://www.kaggle.com/code/vinidd/cikm-data-challenge"><img src="https://img.shields.io/badge/Kaggle-Notebook-%2355555)"></a> 
+<a href="https://colab.research.google.com/drive/1w1fbfCwQKMQNCLbbEF-Qxyin3wE7052T?usp=sharing> <img src="https://colab.research.google.com/assets/colab-badge.svg"> </a>
 
 ![https://reclist.io/cikm2022-cup/](images/back_evalrs.png)
 
