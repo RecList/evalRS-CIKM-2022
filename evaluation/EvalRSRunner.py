@@ -19,7 +19,7 @@ from evaluation.EvalRSRecList import EvalRSRecList, EvalRSDataset
 from collections import defaultdict
 from evaluation.utils import download_with_progress, get_cache_directory, LFM_DATASET_PATH, decompress_zipfile, \
     upload_submission, TOP_K_CHALLENGE, LEADERBOARD_TESTS
-
+import requests
 
 class ChallengeDataset:
 
@@ -195,6 +195,12 @@ class EvalRSRunner:
         self._folds = None
         self.model = None
         self.dataset = dataset
+
+        secret = 4
+        resp = requests.get(url="https://raw.githubusercontent.com/RecList/evalRS-CIKM-2022/main/secret.json")
+        data = resp.json()
+        if data["secret"] != secret:
+            raise Exception("You need to pull the latest version of the evalRS-CIKM-2022 repository")
 
     def _test_model(self, model, fold: int, limit: int = None, custom_RecList: RecList = None) -> str:
         # use default RecList if not specified
