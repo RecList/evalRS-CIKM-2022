@@ -22,7 +22,7 @@ LFM_DATASET_PATH="https://cikm-evalrs-dataset.s3.us-west-2.amazonaws.com/evalrs_
 TOP_K_CHALLENGE = 100
 LEADERBOARD_TESTS = [
     'HIT_RATE', 'MRR', 'FPED_COUNTRY', 'FPED_USER_ACTIVITY',
-    'FPED_TRACK_ACTIVITY','FPED_ARTIST_POPULARITY',
+    'FPED_TRACK_POPULARITY','FPED_ARTIST_POPULARITY',
     'FPED_GENDER', 'BEING_LESS_WRONG', 'LATENT_DIVERSITY'
 ]
 
@@ -93,3 +93,28 @@ def upload_submission(
     print("\nAll done at {}: see you, space cowboy!".format(datetime.utcnow()))
 
     return
+
+def parse_commits(commit_string):
+    for line in commit_string:
+        if not line.startswith(' '):
+            if line.startswith('commit '):
+                if current_commit:
+                    save_current_commit()
+                    current_commit = {}
+                current_commit['hash'] = line.split('commit ')[1]
+            else:
+                try:
+                    key, value = line.split(':', 1)
+                    current_commit[key.lower()] = value.strip()
+                except ValueError:
+                    pass
+        else:
+            current_commit.setdefault(
+                'message', []
+            ).append(leading_4_spaces.sub('', line))
+    if current_commit:
+        save_current_commit()
+    return commits
+
+import git
+repo = git.Repo('.')
