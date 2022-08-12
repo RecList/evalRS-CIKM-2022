@@ -14,7 +14,7 @@ This is the official repository for [EvalRS @ CIKM 2022](https://reclist.io/cikm
 
 During CIKM 2022, we will organize a workshop on rounded evaluation for RecSys, inviting all participants to attend, celebrate the winners, share their learnings wth the community and listen to keynotes from renown practitioners in the field.
 
-Please refer to the appropriate sections below to know how to register for the challenge and how to run the evaluation loop properly. For questions about the prize, the provided scripts and the rules, please join our [Slack](https://join.slack.com/t/nuovaareadila-7ne8814/shared_invite/zt-1ciuzc4cx-Z88wFwguFgD14ylYhGcLzA).
+Please refer to the appropriate sections below to know how to register for the challenge and how to run the evaluation loop properly. For questions about the prize, the provided scripts and the rules, please join our [Slack](https://join.slack.com/t/evalrs2022/shared_invite/zt-1e7if14yr-4wwYAS~dxaP08o~UHCDXcQ).
 
 ### Important dates
 
