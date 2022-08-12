@@ -195,12 +195,12 @@ class EvalRSRunner:
         self._folds = None
         self.model = None
         self.dataset = dataset
+        self.secret = 4
 
-        secret = 4
         resp = requests.get(url="https://raw.githubusercontent.com/RecList/evalRS-CIKM-2022/main/secret.json")
         data = resp.json()
-        if data["secret"] != secret:
-            raise Exception("You need to pull the latest version of the evalRS-CIKM-2022 repository")
+        if data["secret"] != self.secret:
+            raise Exception("Please pull the latest version of the evalRS-CIKM-2022 repository")
 
     def _test_model(self, model, fold: int, limit: int = None, custom_RecList: RecList = None) -> str:
         # use default RecList if not specified
@@ -285,8 +285,8 @@ class EvalRSRunner:
             # extract tests results which we care about
             for test_data in result['data']:
                 if test_data['test_name'] in LEADERBOARD_TESTS:
-                    if isinstance(test_data['test_result'], dict) and 'fped' in test_data['test_result']:
-                        fold_results[test_data['test_name']].append(test_data['test_result']['fped'])
+                    if isinstance(test_data['test_result'], dict) and 'mred' in test_data['test_result']:
+                        fold_results[test_data['test_name']].append(test_data['test_result']['mred'])
                     else:
                         fold_results[test_data['test_name']].append(test_data['test_result'])
         print(json.dumps(fold_results, indent=2))
@@ -302,6 +302,7 @@ class EvalRSRunner:
             'reclist_reports': raw_results,
             'results': agg_results,
             'hash': hash(self),
+            'secret': self.secret,
             'SCORE': leaderboard_score
         }
 
