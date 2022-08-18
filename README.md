@@ -114,7 +114,7 @@ P.s.: if something in the procedure goes wrong, please contact us through Slack!
 
 ### Fourth Step: Run your code
 
-A valid submission script can be obtained by copying into your repository `submission.py`, and modify `MyModel.py` to use your logic instead of the default (random) one. Your submission is required to build an instance of a `RecModel`, providing an implementation for the `train` and `predict` methods.
+A valid submission script can be obtained by copying into your repository `submission.py`, and modify `submission/MyModel.py` to use your logic instead of the default (random) one. Your submission is required to build an instance of a `RecModel`, providing an implementation for the `train` and `predict` methods.
 
 In the `evaluation` folder, we included a [lenghtier explanation of the evaluation methodology](/evaluation/README.md) involved in this challenge; in the `notebooks` folder, we include a step-by-step, heavily commented guide on how to build a submission, including sample data points and an example of using a derived RecList for evaluation. A [Kaggle notebook](https://www.kaggle.com/code/vinidd/cikm-data-challenge) and a [Colab Notebook](https://colab.research.google.com/drive/1w1fbfCwQKMQNCLbbEF-Qxyin3wE7052T?usp=sharing) are also available. The EDA notebook showcases some important features of the dataset, and provide a start for exploring the problem - the picture below shows music consumption by hour of day for example:
 
