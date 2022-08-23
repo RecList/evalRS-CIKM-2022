@@ -100,39 +100,39 @@ class EvalRSRecList(RecList):
 
     @rec_test('MRED_USER_ACTIVITY')
     def mred_user_activity(self):
-        bins = np.array([10,100,1000,10000])
         user_activity = self._x_train[self._x_train['user_id'].isin(self._y_test.index)]
         user_activity = user_activity.groupby('user_id',as_index=True, sort=False)[['user_track_count']].sum()
         user_activity = user_activity.loc[self._y_test.index]
 
-        user_activity['bin_index'] = np.digitize(user_activity.values.reshape(-1), bins)
-        user_activity['bins'] = bins[user_activity['bin_index'].values-1]
+        quantile_bins = np.quantile(user_activity.values.reshape(-1), np.arange(0, 1, 0.2))
+        user_activity['bin_index'] = np.digitize(user_activity.values.reshape(-1), quantile_bins)
+        user_activity['bins'] = quantile_bins[user_activity['bin_index'].values-1]
 
         return self.miss_rate_equality_difference(self._y_preds, self._y_test, user_activity, 'bins')
 
     @rec_test('MRED_TRACK_POPULARITY')
     def mred_track_popularity(self):
-        bins = np.array([10, 100, 1000, 10000, 100000])
         track_id = self._y_test['track_id']
         track_activity = self._x_train[self._x_train['track_id'].isin(track_id)]
         track_activity = track_activity.groupby('track_id', as_index=True, sort=False)[['user_track_count']].sum()
         track_activity = track_activity.loc[track_id]
 
-        track_activity['bin_index'] = np.digitize(track_activity.values.reshape(-1), bins)
-        track_activity['bins'] = bins[track_activity['bin_index'].values - 1]
+        quantile_bins = np.quantile(track_activity.values.reshape(-1), np.arange(0, 1, 0.2))
+        track_activity['bin_index'] = np.digitize(track_activity.values.reshape(-1), quantile_bins)
+        track_activity['bins'] = quantile_bins[track_activity['bin_index'].values - 1]
 
         return self.miss_rate_equality_difference(self._y_preds, self._y_test, track_activity, 'bins')
 
     @rec_test('MRED_ARTIST_POPULARITY')
     def mred_artist_popularity(self):
-        bins = np.array([10, 100, 1000, 10000, 100000])
         artist_id = self.product_data['items'].loc[self._y_test['track_id'], 'artist_id']
         artist_activity = self._x_train[self._x_train['artist_id'].isin(artist_id)]
         artist_activity = artist_activity.groupby('artist_id', as_index=True, sort=False)[['user_track_count']].sum()
         artist_activity = artist_activity.loc[artist_id]
 
-        artist_activity['bin_index'] = np.digitize(artist_activity.values.reshape(-1), bins)
-        artist_activity['bins'] = bins[artist_activity['bin_index'].values - 1]
+        quantile_bins = np.quantile(artist_activity.values.reshape(-1), np.arange(0, 1, 0.2))
+        artist_activity['bin_index'] = np.digitize(artist_activity.values.reshape(-1), quantile_bins)
+        artist_activity['bins'] = quantile_bins[artist_activity['bin_index'].values - 1]
 
         return self.miss_rate_equality_difference(self._y_preds, self._y_test, artist_activity, 'bins')
 
