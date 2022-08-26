@@ -135,7 +135,7 @@ class ChallengeDataset:
             df_fold_events = df_fold_events[df_fold_events['track_id'].isin(valid_track_ids)]
 
             df_groupby = df_fold_events.groupby(by='user_id', as_index=False)
-            df_test = df_groupby.sample(n=1, random_state=seed)[['user_id', 'track_id']]
+            df_test = df_groupby.sample(n=1, random_state=seed)[['user_id', 'timestamp', 'track_id']]
             df_test['fold'] = fold
             df_train = df_fold_events.index.difference(df_test.index).to_frame(name='index')
             df_train['fold'] = fold
@@ -166,7 +166,7 @@ class ChallengeDataset:
 
     def _get_test_set(self, fold: int, limit: int = None, seed: int =0) -> pd.DataFrame:
         assert fold <= self._test_set['fold'].max()
-        test_set = self._test_set[self._test_set['fold'] == fold][['user_id', 'track_id']]
+        test_set = self._test_set[self._test_set['fold'] == fold][['user_id', 'timestamp', 'track_id']]
         if limit:
             return test_set.sample(n=limit, random_state=seed)
         else:
