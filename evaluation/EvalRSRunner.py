@@ -23,9 +23,10 @@ import requests
 
 class ChallengeDataset:
 
-    def __init__(self, num_folds=4, seed: int = None, force_download: bool = False):
+    def __init__(self, num_folds=4, seed: int = None, force_download: bool = False, load_timestamp_in_data: bool=False):
         # download dataset
         self.path_to_dataset = os.path.join(get_cache_directory(), 'evalrs_dataset')
+        self.load_timestamp_in_data = load_timestamp_in_data
         if not os.path.exists(self.path_to_dataset) or force_download:
             print("Downloading LFM dataset...")
             download_with_progress(LFM_DATASET_PATH, os.path.join(get_cache_directory(), 'evalrs_dataset.zip'))
@@ -135,7 +136,13 @@ class ChallengeDataset:
             df_fold_events = df_fold_events[df_fold_events['track_id'].isin(valid_track_ids)]
 
             df_groupby = df_fold_events.groupby(by='user_id', as_index=False)
-            df_test = df_groupby.sample(n=1, random_state=seed)[['user_id', 'timestamp', 'track_id']]
+
+            if self.load_timestamp_in_data:
+                subset_of_cols_to_return = ['user_id', 'timestamp', 'track_id']
+            else:
+                subset_of_cols_to_return = ['user_id', 'track_id']
+
+            df_test = df_groupby.sample(n=1, random_state=seed)[subset_of_cols_to_return]
             df_test['fold'] = fold
             df_train = df_fold_events.index.difference(df_test.index).to_frame(name='index')
             df_train['fold'] = fold
@@ -165,8 +172,13 @@ class ChallengeDataset:
         return self.df_events.loc[train_index]
 
     def _get_test_set(self, fold: int, limit: int = None, seed: int =0) -> pd.DataFrame:
+        if self.load_timestamp_in_data:
+            subset_of_cols_to_return = ['user_id', 'timestamp', 'track_id']
+        else:
+            subset_of_cols_to_return = ['user_id', 'track_id']
+
         assert fold <= self._test_set['fold'].max()
-        test_set = self._test_set[self._test_set['fold'] == fold][['user_id', 'timestamp', 'track_id']]
+        test_set = self._test_set[self._test_set['fold'] == fold][subset_of_cols_to_return]
         if limit:
             return test_set.sample(n=limit, random_state=seed)
         else:
