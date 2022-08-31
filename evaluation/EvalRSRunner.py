@@ -7,6 +7,7 @@
     Please refer to the README for more details and check submission.py for a sample implementation.
 
 """
+from dataclasses import dataclass
 import os
 import inspect
 import hashlib
@@ -224,7 +225,58 @@ class EvalRSRunner:
 
     # simple mean for now
     def _aggregate_scores(self, agg_test_results: dict) -> float:
-        return np.mean(list(agg_test_results.values()))
+        """Aggregate scores on individual tests.
+
+        Here, we consider the following tests:
+        'HIT_RATE', 'MRR', 'MRED_COUNTRY', 'MRED_USER_ACTIVITY',
+        'MRED_TRACK_POPULARITY','MRED_ARTIST_POPULARITY',
+        'MRED_GENDER', 'BEING_LESS_WRONG', 'LATENT_DIVERSITY' 
+
+        The function returns:
+
+        - leaderboard_score: phase 2 score. It is computed normalizing each test score as
+            the relative performance between a chosen baseline and the best results among
+            submissions in Phase 1. Here, we use the official CBOW baseline.
+            Note that if the submission does not meet the minimum requirements for HR@100
+            and MRR, this score is set to 0.
+
+        - p1_score: score assigned using the logic during phase 1. Use this score just 
+            for reference with scores in phase 1. WE WILL NOT USE THIS SCORE IN PHASE 2.
+        """
+        p1_score = np.mean(list(agg_test_results.values()))
+        reference = PhaseOne()
+        
+        # Check if submission meets minimum reqs
+        if agg_test_results["HR"] < reference.HR_THRESHOLD:
+            return 0.0, p1_score
+        
+        normalized_scores = dict()
+        for test in LEADERBOARD_TESTS:
+            normalized_scores[test] = (
+                agg_test_results[test] - reference.baseline[test]
+            ) / (reference.best[test] - reference.baseline[test])
+
+        # Computing meta-scores
+        # Performance
+        ms_perf = (normalized_scores["HIT_RATE"] + normalized_scores["MRR"]) / 2
+        # Fairness / Slicing
+        ms_fair = (
+            normalized_scores["MRED_COUNTRY"] +
+            normalized_scores["MRED_USER_ACTIVITY"] +
+            normalized_scores["MRED_TRACK_POPULARITY"] +
+            normalized_scores["MRED_ARTIST_POPULARITY"] +
+            normalized_scores["MRED_GENDER"]
+        ) / 5
+        # Behavioral
+        ms_behav = (
+            normalized_scores["BEING_LESS_WRONG"] + normalized_scores["LATENT_DIVERSITY"]
+        ) / 2
+
+        # Meta-scores weights
+        w = 1, 1.5, 1.5
+        leaderboard_score = (w[0] * ms_perf + w[1] * ms_fair + w[2] * ms_behav) / sum(w)
+        
+        return leaderboard_score, p1_score
 
     def evaluate(
             self,
@@ -293,7 +345,7 @@ class EvalRSRunner:
         # compute means for each test over fold
         agg_results = {test: np.mean(res) for test, res in fold_results.items()}
         # generate single score
-        leaderboard_score = self._aggregate_scores(agg_results)
+        leaderboard_score, p1_score = self._aggregate_scores(agg_results)
         print("LEADERBOARD SCORE : {}".format(leaderboard_score))
 
         # TODO: CI computation ?
@@ -303,6 +355,7 @@ class EvalRSRunner:
             'results': agg_results,
             'hash': hash(self),
             'secret': self.secret,
+            'phase_one_score': p1_score,
             'SCORE': leaderboard_score
         }
 
@@ -335,3 +388,41 @@ class EvalRSRunner:
         hash_input = '_'.join([str(_) for _ in hash_inputs])
         return int(hashlib.sha256(hash_input.encode()).hexdigest(), 16)
 
+
+@dataclass
+class PhaseOne:
+
+    @property
+    def baseline(self):
+        return self._CBOW_SCORES
+
+    @property
+    def best(self):
+        return self._BEST_SCORE_P1
+
+    HR_THRESHOLD = 100 / 29725
+    MRR_THRESHOLD = 1e-5
+
+    _CBOW_SCORES = {
+        "HIT_RATE": 0.018763,
+        "MRR": 0.001654,
+        "MRED_COUNTRY": -0.006944,
+        "MRED_USER_ACTIVITY": -0.012460,
+        "MRED_TRACK_POPULARITY": -0.006816,
+        "MRED_ARTIST_POPULARITY": -0.003915,
+        "MRED_GENDER": -0.004354,
+        "BEING_LESS_WRONG": 0.2744871, # Original score (0.322926) decreased by 15%
+        "LATENT_DIVERSITY": -0.324706
+    }
+
+    _BEST_SCORE_P1 = {
+        "HIT_RATE": 0.264642,
+        "MRR": 0.067493,
+        "MRED_COUNTRY": -0.000037,
+        "MRED_USER_ACTIVITY": -0.000051,
+        "MRED_TRACK_POPULARITY": -0.000036,
+        "MRED_ARTIST_POPULARITY": -0.000028,
+        "MRED_GENDER": -0.000032,
+        "BEING_LESS_WRONG": 0.40635,
+        "LATENT_DIVERSITY": -0.202812
+    }
