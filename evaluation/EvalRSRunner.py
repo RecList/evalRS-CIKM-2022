@@ -402,7 +402,7 @@ class PhaseOne:
     def best(self):
         return self._BEST_SCORE_P1
 
-    HR_THRESHOLD = (4 * 20) / (4 * 29725)
+    HR_THRESHOLD = (4 * 100) / (4 * 29725)
     MRR_THRESHOLD = 1e-5
 
     _CBOW_SCORES = {
