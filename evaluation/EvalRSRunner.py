@@ -235,7 +235,7 @@ class EvalRSRunner:
         The function returns:
 
         - leaderboard_score: phase 2 score. It is computed normalizing each test score as
-            the relative performance between a chosen baseline the best results among
+            the relative performance between a chosen baseline and the best results among
             submissions in Phase 1. Here, we use the official CBOW baseline.
             Note that if the submission does not meet the minimum requirements for HR@100
             and MRR, this score is set to 0.
