@@ -236,13 +236,23 @@ class EvalRSRunner:
 
         - leaderboard_score: phase 2 score. It is computed normalizing each test score as
             the relative performance between a chosen baseline the best results among
-            submissions in Phase 1. Here, we use the official CBOW baseline. 
+            submissions in Phase 1. Here, we use the official CBOW baseline.
+            Note that if the submission does not meet the minimum requirements for HR@100
+            and MRR, this score is set to 0.
+
         - p1_score: score assigned using the logic during phase 1. Use this score just 
             for reference with scores in phase 1. WE WILL NOT USE THIS SCORE IN PHASE 2.
         """
-        normalized_scores = dict()
+        p1_score = np.mean(list(agg_test_results.values()))
         reference = PhaseOne()
         
+        # Check if submission 
+        mrr_check = agg_test_results["MRR"] < reference.MRR_THRESHOLD
+        hr_check = agg_test_results["HR"] < reference.HR_THRESHOLD
+        if mrr_check or hr_check:
+            return 0.0, p1_score
+        
+        normalized_scores = dict()
         for test in LEADERBOARD_TESTS:
             normalized_scores[test] = (
                 agg_test_results[test] - reference.baseline[test]
@@ -267,7 +277,7 @@ class EvalRSRunner:
         # Meta-scores weights
         w = 1, 1.5, 1.5
         leaderboard_score = (w[0] * ms_perf + w[1] * ms_fair + w[2] * ms_behav) / sum(w)
-        p1_score = np.mean(list(agg_test_results.values()))
+        
         return leaderboard_score, p1_score
 
     def evaluate(
