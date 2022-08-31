@@ -413,7 +413,7 @@ class PhaseOne:
         "MRED_TRACK_POPULARITY": -0.006816,
         "MRED_ARTIST_POPULARITY": -0.003915,
         "MRED_GENDER": -0.004354,
-        "BEING_LESS_WRONG": 0.322926,
+        "BEING_LESS_WRONG": 0.2744871, # Original score (0.322926) decreased by 15%
         "LATENT_DIVERSITY": -0.324706
     }
 
