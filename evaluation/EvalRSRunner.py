@@ -246,7 +246,7 @@ class EvalRSRunner:
         p1_score = np.mean(list(agg_test_results.values()))
         reference = PhaseOne()
         
-        # Check if submission 
+        # Check if submission meets minimum reqs
         mrr_check = agg_test_results["MRR"] < reference.MRR_THRESHOLD
         hr_check = agg_test_results["HR"] < reference.HR_THRESHOLD
         if mrr_check or hr_check:
