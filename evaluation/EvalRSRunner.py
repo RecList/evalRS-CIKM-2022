@@ -247,9 +247,7 @@ class EvalRSRunner:
         reference = PhaseOne()
         
         # Check if submission meets minimum reqs
-        mrr_check = agg_test_results["MRR"] < reference.MRR_THRESHOLD
-        hr_check = agg_test_results["HR"] < reference.HR_THRESHOLD
-        if mrr_check or hr_check:
+        if agg_test_results["HR"] < reference.HR_THRESHOLD:
             return 0.0, p1_score
         
         normalized_scores = dict()
@@ -402,7 +400,7 @@ class PhaseOne:
     def best(self):
         return self._BEST_SCORE_P1
 
-    HR_THRESHOLD = 4 / 29725
+    HR_THRESHOLD = 100 / 29725
     MRR_THRESHOLD = 1e-5
 
     _CBOW_SCORES = {
