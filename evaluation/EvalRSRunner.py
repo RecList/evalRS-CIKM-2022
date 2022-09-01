@@ -196,7 +196,7 @@ class EvalRSRunner:
         self._folds = None
         self.model = None
         self.dataset = dataset
-        self.secret = 4
+        self.secret = 1214210679
 
         resp = requests.get(url="https://raw.githubusercontent.com/RecList/evalRS-CIKM-2022/main/secret.json")
         data = resp.json()
@@ -246,8 +246,8 @@ class EvalRSRunner:
         p1_score = np.mean(list(agg_test_results.values()))
         reference = PhaseOne()
         
-        # Check if submission meets minimum reqs
-        if agg_test_results["HR"] < reference.HR_THRESHOLD:
+        # Check if submission meets minimum reqs
+        if agg_test_results["HIT_RATE"] < reference.HR_THRESHOLD:
             return 0.0, p1_score
         
         normalized_scores = dict()
@@ -256,10 +256,10 @@ class EvalRSRunner:
                 agg_test_results[test] - reference.baseline[test]
             ) / (reference.best[test] - reference.baseline[test])
 
-        # Computing meta-scores
-        # Performance
+        # Computing meta-scores
+        # Performance
         ms_perf = (normalized_scores["HIT_RATE"] + normalized_scores["MRR"]) / 2
-        # Fairness / Slicing
+        #Fairness / Slicing
         ms_fair = (
             normalized_scores["MRED_COUNTRY"] +
             normalized_scores["MRED_USER_ACTIVITY"] +
@@ -272,7 +272,7 @@ class EvalRSRunner:
             normalized_scores["BEING_LESS_WRONG"] + normalized_scores["LATENT_DIVERSITY"]
         ) / 2
 
-        # Meta-scores weights
+        # Meta-scores weights
         w = 1, 1.5, 1.5
         leaderboard_score = (w[0] * ms_perf + w[1] * ms_fair + w[2] * ms_behav) / sum(w)
         
