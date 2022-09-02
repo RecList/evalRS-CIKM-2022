@@ -138,10 +138,7 @@ class ChallengeDataset:
 
             df_groupby = df_fold_events.groupby(by='user_id', as_index=False)
 
-            if self.load_timestamp_in_data:
-                subset_of_cols_to_return = ['user_id', 'timestamp', 'track_id']
-            else:
-                subset_of_cols_to_return = ['user_id', 'track_id']
+            subset_of_cols_to_return = ['user_id', 'track_id']
 
             df_test = df_groupby.sample(n=1, random_state=seed)[subset_of_cols_to_return]
             df_test['fold'] = fold
@@ -173,10 +170,7 @@ class ChallengeDataset:
         return self.df_events.loc[train_index]
 
     def _get_test_set(self, fold: int, limit: int = None, seed: int =0) -> pd.DataFrame:
-        if self.load_timestamp_in_data:
-            subset_of_cols_to_return = ['user_id', 'timestamp', 'track_id']
-        else:
-            subset_of_cols_to_return = ['user_id', 'track_id']
+        subset_of_cols_to_return = ['user_id', 'track_id']
 
         assert fold <= self._test_set['fold'].max()
         test_set = self._test_set[self._test_set['fold'] == fold][subset_of_cols_to_return]
