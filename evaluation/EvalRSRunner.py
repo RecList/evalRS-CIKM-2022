@@ -24,10 +24,9 @@ import requests
 
 class ChallengeDataset:
 
-    def __init__(self, num_folds=4, seed: int = None, force_download: bool = False, load_timestamp_in_data: bool=False):
+    def __init__(self, num_folds=4, seed: int = None, force_download: bool = False):
         # download dataset
         self.path_to_dataset = os.path.join(get_cache_directory(), 'evalrs_dataset')
-        self.load_timestamp_in_data = load_timestamp_in_data
         if not os.path.exists(self.path_to_dataset) or force_download:
             print("Downloading LFM dataset...")
             download_with_progress(LFM_DATASET_PATH, os.path.join(get_cache_directory(), 'evalrs_dataset.zip'))
