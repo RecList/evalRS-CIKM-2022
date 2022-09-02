@@ -119,9 +119,9 @@ class ChallengeDataset:
 
     def _generate_folds(self, num_folds: int, seed: int, frac=0.25) -> (pd.DataFrame, pd.DataFrame):
 
-        fold_ids = [(self.unique_user_ids_df.sample(frac=frac, random_state=seed)
+        fold_ids = [(self.unique_user_ids_df.sample(frac=frac, random_state=seed+_)
                      .reset_index(drop=True)
-                     .rename({'user_id': _}, axis=1)) for _ in range(4)]
+                     .rename({'user_id': _}, axis=1)) for _ in range(num_folds)]
         # in theory all users should have at least 10 interactions
         df_fold_user_ids = pd.concat(fold_ids, axis=1)
 
