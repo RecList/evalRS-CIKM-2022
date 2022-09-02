@@ -297,6 +297,8 @@ class EvalRSRunner:
     ):
         if debug:
             print('\nBegin Evaluation... ')
+            start = time.time()
+
         self._random_state = int(time.time()) if not seed else seed
         self.model = model
 
@@ -375,6 +377,8 @@ class EvalRSRunner:
                                   aws_secret_access_key=self.aws_secret_access_key,
                                   participant_id=self.participant_id,
                                   bucket_name=self.bucket_name)
+        if debug:
+            print(f"Entire Process Duration: {time.time() - start}")
 
     def __hash__(self):
         hash_inputs = [
