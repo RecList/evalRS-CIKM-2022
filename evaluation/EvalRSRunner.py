@@ -378,7 +378,8 @@ class EvalRSRunner:
                                   participant_id=self.participant_id,
                                   bucket_name=self.bucket_name)
         if debug:
-            print(f"Entire Process Duration: {time.time() - start}")
+            time_for_submissison = (time.time() - start)/60
+            print(f"Entire Process Duration: {time_for_submissison} Minutes")
 
     def __hash__(self):
         hash_inputs = [
