@@ -201,7 +201,7 @@ class EvalRSRunner:
         self._folds = None
         self.model = None
         self.dataset = dataset
-        self.secret = 4
+        self.secret = 1214210679
 
         resp = requests.get(url="https://raw.githubusercontent.com/RecList/evalRS-CIKM-2022/main/secret.json")
         data = resp.json()
