@@ -119,7 +119,6 @@ class EvalRSRecList(RecList):
         track_activity = track_activity.loc[track_id]
 
         track_activity['bin_index'] = np.digitize(track_activity.values.reshape(-1), bins)
-        print(np.unique(track_activity['bin_index'].values))
         track_activity['bins'] = bins[track_activity['bin_index'].values - 1]
 
         return self.miss_rate_equality_difference(self._y_preds, self._y_test, track_activity, 'bins')
