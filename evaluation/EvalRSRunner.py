@@ -253,7 +253,7 @@ class EvalRSRunner:
         
         # Check if submission meets minimum reqs
         if agg_test_results["HIT_RATE"] < reference.HR_THRESHOLD:
-            return 0.0, p1_score
+            return -100.0, p1_score
         
         normalized_scores = dict()
         for test in LEADERBOARD_TESTS:
