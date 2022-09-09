@@ -154,4 +154,6 @@ As explained in the rules, we adopt a timeline in two phases for the leadeboard 
 
 Practically, you won't have to change anything in your model code between the two phases, as everything is handled magically for you by the provided abstractions. As in phase 1, we encourage you to submit often in phase 2 as well.
 
+The final aggregation function is available in the [repository](https://github.com/RecList/evalRS-CIKM-2022/blob/c09cf24c064695b0432a2b899735c19cd0161399/evaluation/EvalRSRunner.py#L232), and will be detailed in an upcoming paper as well.
+
 ![Challenge two phases](../images/phases.jpg)
