@@ -221,7 +221,9 @@ Given the novelty of the challenges, it is a non-trivial question on how to comb
 
 In the first phase, the leaderboard is a simple average of the scores in each test from our test suite: every time you submit you will receive an e-mail with full scoring details, allowing you to understand the tests and your models in depth. _We encourage you to submit many times and iterate fast in this first phase_. 
 
-We will use the scores collected in phase 1 to push an update to the evaluation script (we will notify everyone in the Slack channel), and then open phase 2, in which the final score will be weighted based on the distribution of individual tests: i.e. if some tests turn out to be easy across teams, their importance will be downplayed. Only the score in the leaderboard at the end of phase 2 are considered for the prizes below. Remember: even in phase 2 you can submit as many times as you like.
+We will use the scores collected in phase 1 to push an update to the evaluation script (we will notify everyone in the Slack channel), and then open phase 2, in which the final score will be weighted based on the distribution of individual tests: i.e. if some tests turn out to be easy across teams, their importance will be downplayed. Only the score in the leaderboard at the end of phase 2 are considered for the prizes below. Remember: even in phase 2 you can submit as many times as you like. 
+
+_Note_: the final implementation for scoring is available in the [repo](https://github.com/RecList/evalRS-CIKM-2022/blob/c09cf24c064695b0432a2b899735c19cd0161399/evaluation/EvalRSRunner.py#L232). We will also add further details about our learnings in an upcoming paper: stay tuned!
 
 Practically, your evaluation routine won't change between the two phases (if not for updating the repo), as all the aggregation logic is handled automatically by our script; however, when moving from phase 1 to phase 2 your model may perform differently on the leaderboard: the second phase of the challenge will give you the chance to optimize the model according to the final weighting scheme, and to understand even better the nature of the testing strategy.
 
