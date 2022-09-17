@@ -240,7 +240,7 @@ Thanks to our generous sponsors, the following prizes will be awarded (at the so
 
 We invite the submissions of two types of paper: short design papers (2 pages plus references) in which authors can briefly describe their model and tests, or longer regular papers (5 pages plus references), in which authors may provide a lengthier description of their approach, engage with the relevant literature and detail the testing strategies they adopted. Teams are required to submit _at least a short paper_ for their submission, but only regular papers will be published through CEUR in the workshop proceedings (_all papers_ will be archived in this repository and _all authors_ will have a chance to present at the hybrid workshop during CIKM).
 
-Submissions should follow the [CEUR Template](https://it.overleaf.com/latex/templates/template-for-submissions-to-ceur-workshop-proceedings-ceur-ws-dot-org/wqyfdgftmcfw). All papers will be peer reviewed (single blind, the papers should _not_ be anynomyzed) by two experts each: reviews are mainly meant at improving and clarifying the work, and ensure the necessarily scholarly standards for CIKM (reference, clarity, rigor). 
+Submissions should follow the [CEUR Template](https://it.overleaf.com/latex/templates/template-for-submissions-to-ceur-workshop-proceedings-ceur-ws-dot-org/wqyfdgftmcfw), and use the two columns format. All papers will be peer reviewed (single blind, the papers should _not_ be anynomyzed) by two experts each: reviews are mainly meant at improving and clarifying the work, and ensure the necessarily scholarly standards for CIKM (reference, clarity, rigor). 
 
 _Paper structure_
 
