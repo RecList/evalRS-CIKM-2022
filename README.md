@@ -236,6 +236,8 @@ Thanks to our generous sponsors, the following prizes will be awarded (at the so
 * two (2) RecList prizes, 500 USD each, for exceptional contributions in the form of an oustanding paper and / or novel / creative testing methodologies and / or clever data augmentation strategies;
 * 5 CIKM virtual attendance tickets to 5 students (on different projects, subject to a complete submission): organizers will consider submission quality and students' backgrounds (precedence to students from under-represented backgrounds). Students can write the paper with other researchers, but they have to appear as the first author in the submitted paper to qualify for the prize.
 
+Please note that monetary prizes will be awarded through PayPal or checks (only for US based addresses).
+
 ### Call for Papers
 
 We invite the submissions of two types of paper: short design papers (2 pages plus references) in which authors can briefly describe their model and tests, or longer regular papers (5 pages plus references), in which authors may provide a lengthier description of their approach, engage with the relevant literature and detail the testing strategies they adopted. Teams are required to submit _at least a short paper_ for their submission, but only regular papers will be published through CEUR in the workshop proceedings (_all papers_ will be archived in this repository and _all authors_ will have a chance to present at the hybrid workshop during CIKM).
