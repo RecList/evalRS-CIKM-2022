@@ -9,7 +9,7 @@ Official Repository for EvalRS @ CIKM 2022: a Rounded Evaluation of Recommender 
 ![https://reclist.io/cikm2022-cup/](images/back_evalrs.png)
 
 
-[ Note: this was the original README for the competition, "as is" ]
+[ _Note_: this was the original README for the competition, maintained "as is". You can still run the code to test your own model on the same evaluation loop, and compare your results with the public leaderboard. Please note that the current code won't in fact upload the results to the EvalRS server, but just print them out locally. ]
 
 ## Overview
 

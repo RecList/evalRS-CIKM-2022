@@ -312,12 +312,12 @@ class EvalRSRunner:
             print("\nWARNING: default values are not used - upload is disabled")
             upload = False
         # if upload, check we have the necessary credentials
-        if upload:
-            assert self.email
-            assert self.participant_id
-            assert self.aws_access_key_id
-            assert self.aws_secret_access_key
-            assert self.bucket_name
+        #if upload:
+            #assert self.email
+            #assert self.participant_id
+            #assert self.aws_access_key_id
+            #assert self.aws_secret_access_key
+            #assert self.bucket_name
 
         fold_results_path = []
         # perform training and evaluation for each fold
@@ -372,11 +372,12 @@ class EvalRSRunner:
                 json.dump(out_dict, outfile, indent=2)
             print('SUBMISSION RESULTS SAVED TO {}'.format(local_file))
             if upload:
-                upload_submission(local_file,
-                                  aws_access_key_id=self.aws_access_key_id,
-                                  aws_secret_access_key=self.aws_secret_access_key,
-                                  participant_id=self.participant_id,
-                                  bucket_name=self.bucket_name)
+                print('EvalRS server not available anymore: skipping upload!')
+                # upload_submission(local_file,
+                #                  aws_access_key_id=self.aws_access_key_id,
+                #                  aws_secret_access_key=self.aws_secret_access_key,
+                #                  participant_id=self.participant_id,
+                #                  bucket_name=self.bucket_name)
         if debug:
             time_for_submission = (time.time() - start)/60
             print(f"Entire Process Duration: {time_for_submission} Minutes")
