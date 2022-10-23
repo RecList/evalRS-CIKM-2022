@@ -62,7 +62,9 @@ For information on how the original dataset was built and what meta-data are ava
 
 ### First Step: Register
 
-* Register [Online](https://reclist.io/cikm2022-cup/leaderboard.html). You should get some tokens, save them for later! 
+[ _Note_: registration is now closed, you can skip this step to run your own model against EvalRS tests! ]
+
+* Register [Online](https://reclist.io/cikm2022-cup/). You should get some tokens, save them for later! 
 
 
 ### Second Step: Setup your environment
@@ -86,6 +88,8 @@ Be aware, Github Codespaces is still in beta, if you don't have already applied 
 
 ### Third Step: Configure your envs
 
+[ _Note_: you can run the sample script without any env file, since now the loop will only run locally given that EvalRS is not running. ]
+
 A sample submission script is included in this repository as a template. We suggest you run it _as soon as you have received your credentials_ to check that your setup is correct.
 
 We use dot files to manage secret keys. Copy the `local.env` file and create an 
@@ -107,7 +111,7 @@ python submission.py
 
 This first run will also download the dataset for you (and it won't download it again next again unless you specify `force_download=True` when instantiating the ChallengeDataset class). The code
 runs a random model baseline, computes the score and sent them to the leaderboard. 
-Click [here](https://reclist.io/cikm2022-cup/leaderboard.html) to see the leaderboard! It should look like this:
+Click [here](https://reclist.io/cikm2022-cup/) to see the leaderboard! It should look like this:
 
 ![https://reclist.io/cikm2022-cup/leaderboard.html](images/leaderboard.png)
 

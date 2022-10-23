@@ -18,7 +18,7 @@ load_dotenv('upload.env', verbose=True)
 
 # variables for the submission
 EMAIL = os.getenv('EMAIL')  # the e-mail you used to sign up
-assert EMAIL != '' and EMAIL is not None
+# assert EMAIL != '' and EMAIL is not None
 BUCKET_NAME = os.getenv('BUCKET_NAME')  # you received it in your e-mail
 PARTICIPANT_ID = os.getenv('PARTICIPANT_ID')  # you received it in your e-mail
 AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY')  # you received it in your e-mail
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # load the dataset
     print('\n\n==== Loading dataset at: {} ====\n'.format(datetime.utcnow()))
     # this will load the dataset with the default values for the challenge
-    dataset = ChallengeDataset()
+    dataset = ChallengeDataset(force_download=True)
     print('\n\n==== Init runner at: {} ====\n'.format(datetime.utcnow()))
     # run the evaluation loop
     runner = EvalRSRunner(
