@@ -136,9 +136,11 @@ Ranking | Team | Score
 
 ## Papers and Repositories
 
-* Team wwweiwei, _Track2Vec: Fairness Music Recommendation with a GPU-Free Customizable-Driven Framework_,[code](https://github.com/wwweiwei/Track2Vec) [paper](/final_papers/EvalRS2022_paper_582.pdf)
-* Team fgiobergia, _Triplet Losses-based Matrix Factorization for Robust Recommendations_, [code](https://github.com/fgiobergia/CIKM-evalRS-2022/) [paper](/final_papers/EvalRS2022_paper_8348.pdf)
-* Team ML, _Item-based Variational Auto-encoder for Fair Music Recommendation_, [code](https://github.com/ParkJinHyeock/evalRS-submission) [paper](/final_papers/EvalRS2022_paper_5248.pdf)
-* Team Scrolls, _Bias Mitigation in Recommender Systems to Improve Diversity_, [code](https://github.com/fidelity/jurity/tree/evalrs/evalrs) [paper](/final_papers/EvalRS2022_paper_1487.pdf)
-* Team yao0510, _RecFormer: Personalized Temporal-Aware Transformer for Fair Music Recommendation_, [code](https://github.com/wywyWang/RecFormer) [paper](/final_papers/EvalRS2022_paper_4951.pdf)
-* Team lyk, _Diversity enhancement for Collaborative Filtering Recommendation_, [code](https://github.com/lazy2panda/evalrs2022_solution) [paper](/final_papers/EvalRS2022_paper_5875.pdf)
+Team | Title | Paper | Repo |
+--- | --- | --- | ---
+wwweiwei | Track2Vec: Fairness Music Recommendation with a GPU-Free Customizable-Driven Framework | [paper](/final_papers/EvalRS2022_paper_582.pdf) | [code](https://github.com/wwweiwei/Track2Vec) 
+fgiobergia | Triplet Losses-based Matrix Factorization for Robust Recommendations | [paper](/final_papers/EvalRS2022_paper_8348.pdf) [arxiv](https://arxiv.org/abs/2210.12098) | [code](https://github.com/fgiobergia/CIKM-evalRS-2022/) 
+ML | Item-based Variational Auto-encoder for Fair Music Recommendation | [paper](/final_papers/EvalRS2022_paper_5248.pdf) | [code](https://github.com/ParkJinHyeock/evalRS-submission)
+Scrolls | Bias Mitigation in Recommender Systems to Improve Diversity | [paper](/final_papers/EvalRS2022_paper_1487.pdf) | [code](https://github.com/fidelity/jurity/tree/evalrs/evalrs)
+yao0510 | RecFormer: Personalized Temporal-Aware Transformer for Fair Music Recommendation | [paper](/final_papers/EvalRS2022_paper_4951.pdf) | [code](https://github.com/wywyWang/RecFormer) 
+lyk | Diversity enhancement for Collaborative Filtering Recommendation | [paper](/final_papers/EvalRS2022_paper_5875.pdf) | [code](https://github.com/lazy2panda/evalrs2022_solution)
