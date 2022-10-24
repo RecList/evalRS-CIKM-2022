@@ -132,7 +132,9 @@ Ranking | Team | Score
 * [EvalRS Challenge Presentation](/workshop_slides/challenge_presentation_tagliabue.pdf)
 * [Keynote by Prof. Jannach](/workshop_slides/keynote_jannach.pdf)
 * [Keynote by Prof. Ekstrand](/workshop_slides/keynote_ekstrand.pdf)
-* [Best paper presentation](/workshop_slides/EvalRS_teamML.pdf)
+* [Best paper presentation, team ML](/workshop_slides/EvalRS_teamML.pdf)
+* [Team wwweiwei](/workshop_slides/EvalRS_wwweiwei.pdf)
+* [Team fgiobergia](/workshop_slides/EvalRS_fgiobergia.pdf)
 
 ## Papers and Repositories
 
