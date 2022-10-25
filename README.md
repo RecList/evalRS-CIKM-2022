@@ -135,6 +135,7 @@ Ranking | Team | Score
 * [Best paper presentation, team ML](/workshop_slides/EvalRS_teamML.pdf)
 * [Team wwweiwei](/workshop_slides/EvalRS_wwweiwei.pdf)
 * [Team fgiobergia](/workshop_slides/EvalRS_fgiobergia.pdf)
+* [Team Scrolls](/workshop_slides/EvalRS_Scrolls.pdf)
 
 ## Papers and Repositories
 
