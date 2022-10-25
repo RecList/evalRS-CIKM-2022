@@ -118,7 +118,7 @@ This Data Challenge was possible thanks to the generous support of these awesome
 
 Ranking | Team | Score
 --- | --- | ---
-1 | lik | 1.70
+1 | lyk | 1.70
 2 | ML | 1.55
 3 | fgiobergia | 1.33
 4 | wwweiwei | 1.18
