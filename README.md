@@ -141,7 +141,7 @@ Ranking | Team | Score
 
 Team | Title | Paper | Repo |
 --- | --- | --- | ---
-wwweiwei | Track2Vec: Fairness Music Recommendation with a GPU-Free Customizable-Driven Framework | [paper](/final_papers/EvalRS2022_paper_582.pdf) | [code](https://github.com/wwweiwei/Track2Vec) 
+wwweiwei | Track2Vec: Fairness Music Recommendation with a GPU-Free Customizable-Driven Framework | [paper](/final_papers/EvalRS2022_paper_582.pdf) [arxiv](https://arxiv.org/abs/2210.16590) | [code](https://github.com/wwweiwei/Track2Vec) 
 fgiobergia | Triplet Losses-based Matrix Factorization for Robust Recommendations | [paper](/final_papers/EvalRS2022_paper_8348.pdf) [arxiv](https://arxiv.org/abs/2210.12098) | [code](https://github.com/fgiobergia/CIKM-evalRS-2022/) 
 ML | Item-based Variational Auto-encoder for Fair Music Recommendation | [paper](/final_papers/EvalRS2022_paper_5248.pdf) | [code](https://github.com/ParkJinHyeock/evalRS-submission)
 Scrolls | Bias Mitigation in Recommender Systems to Improve Diversity | [paper](/final_papers/EvalRS2022_paper_1487.pdf) | [code](https://github.com/fidelity/jurity/tree/evalrs/evalrs)
