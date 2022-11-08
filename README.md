@@ -22,11 +22,13 @@ If you are interested in running the same evaluation loop on your own model, re-
 
 _Papers, code, presentations from EvalRS are all freely available for the community through this repository: check the appropriate sections below for the Award recipients and the materials provided by organizers and partecipants._
 
+If you like our work and wish to support open source RecSys projects, please take a second to add a star to [RecList repository](https://github.com/jacopotagliabue/reclist).
+
 ### Quick links
 
-* 🛖 [EvalRS website](https://reclist.io/cikm2022-cup/)
-* 📚 [EvalRS paper](https://arxiv.org/abs/2207.05772)
 * 📖 [RecList website](https://reclist.io/)
+* 🛖 [EvalRS YouTube Playlist (Keynotes)](https://www.youtube.com/playlist?list=PLvvTyLx3m9oRW3K1OUka0LJWJEqR1tysD)
+* 📚 [EvalRS paper](https://arxiv.org/abs/2207.05772)
 
 ## Organizers
 
@@ -129,9 +131,9 @@ Ranking | Team | Score
 
 ## Workshop Presentations
 
-* [EvalRS Challenge Presentation](/workshop_slides/challenge_presentation_tagliabue.pdf)
-* [Keynote by Prof. Jannach](/workshop_slides/keynote_jannach.pdf)
-* [Keynote by Prof. Ekstrand](/workshop_slides/keynote_ekstrand.pdf)
+* [EvalRS Challenge Presentation](/workshop_slides/challenge_presentation_tagliabue.pdf) - [video](https://youtu.be/Jq2W454ypus)
+* [Keynote by Prof. Jannach](/workshop_slides/keynote_jannach.pdf) - [video](https://youtu.be/VwFXQEv1kDM)
+* [Keynote by Prof. Ekstrand](/workshop_slides/keynote_ekstrand.pdf) - [video](https://youtu.be/JT92-idNm0Q)
 * [Best paper presentation, team ML](/workshop_slides/EvalRS_teamML.pdf)
 * [Team wwweiwei](/workshop_slides/EvalRS_wwweiwei.pdf)
 * [Team fgiobergia](/workshop_slides/EvalRS_fgiobergia.pdf)
