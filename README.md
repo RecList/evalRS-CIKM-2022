@@ -27,8 +27,8 @@ If you like our work and wish to support open source RecSys projects, please tak
 ### Quick links
 
 * 📖 [RecList website](https://reclist.io/)
+* 📖 [Running EvalRS evaluation on your model](https://github.com/RecList/evalRS-CIKM-2022/blob/main/README_CIKM_2022.md)
 * 🛖 [EvalRS YouTube Playlist (Keynotes)](https://www.youtube.com/playlist?list=PLvvTyLx3m9oRW3K1OUka0LJWJEqR1tysD)
-* 📚 [EvalRS paper](https://arxiv.org/abs/2207.05772)
 
 ## Organizers
 
