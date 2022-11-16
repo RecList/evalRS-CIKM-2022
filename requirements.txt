@@ -4,4 +4,4 @@ boto3==1.24.34
 scipy>=1.7.3
 notebook==6.4.12
 seaborn==0.11.2
-git+https://github.com/jacopotagliabue/reclist@develop
+git+https://github.com/jacopotagliabue/reclist@evalrs2022
