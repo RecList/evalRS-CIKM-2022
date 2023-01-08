@@ -20,7 +20,7 @@ During CIKM 2022, we organized a popular workshop on rounded evaluation for RecS
 
 If you are interested in running the same evaluation loop on your own model, re-use our baselines, or simply revisit the rules and guidelines of the original event, please check the official [competition README](/README_CIKM_2022.md). The original README includes also in-depth dataset analyses and explanations on how to run a model and add a custom test to [RecList](https://github.com/jacopotagliabue/reclist). For an introduction to the main themes of this competition and details on our methodology, please refer to the workshop [presentation](/workshop_slides/challenge_presentation_tagliabue.pdf) and [paper](https://arxiv.org/abs/2207.05772).
 
-_Papers, code, presentations from EvalRS are all freely available for the community through this repository: check the appropriate sections below for the Award recipients and the materials provided by organizers and partecipants._
+_[Papers](https://ceur-ws.org/Vol-3318/), code, presentations from EvalRS are all freely available for the community through this repository: check the appropriate sections below for the Award recipients and the materials provided by organizers and partecipants._
 
 If you like our work and wish to support open source RecSys projects, please take a second to add a star to [RecList repository](https://github.com/jacopotagliabue/reclist).
 
