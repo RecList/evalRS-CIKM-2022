@@ -150,4 +150,4 @@ Scrolls | Bias Mitigation in Recommender Systems to Improve Diversity | [paper](
 yao0510 | RecFormer: Personalized Temporal-Aware Transformer for Fair Music Recommendation | [paper](/final_papers/EvalRS2022_paper_4951.pdf) | [code](https://github.com/wywyWang/RecFormer) 
 lyk | Diversity enhancement for Collaborative Filtering Recommendation | [paper](/final_papers/EvalRS2022_paper_5875.pdf) | [code](https://github.com/lazy2panda/evalrs2022_solution)
 
-Selected papers will also appear in the CIKM 2022 CEUR Workshop Proceedings (_forthcoming_ at the moment of writing this, Nov. 2022)
+Selected papers also appear in the [Proceedings of the CIKM 2022 Workshops, co-located with 31st ACM International Conference on Information and Knowledge Management (CIKM 2022)](https://ceur-ws.org/Vol-3318/).
