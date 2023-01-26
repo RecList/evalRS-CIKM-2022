@@ -28,6 +28,7 @@ If you like our work and wish to support open source RecSys projects, please tak
 
 * 📖 [RecList website](https://reclist.io/)
 * 📖 [Running EvalRS evaluation on your model](https://github.com/RecList/evalRS-CIKM-2022/blob/main/README_CIKM_2022.md)
+* 📖 [Our Challenge Review for Nature Machine Intelligence](https://www.nature.com/articles/s42256-022-00606-0)
 * 🛖 [EvalRS YouTube Playlist (Keynotes)](https://www.youtube.com/playlist?list=PLvvTyLx3m9oRW3K1OUka0LJWJEqR1tysD)
 
 ## Organizers
@@ -67,6 +68,19 @@ _RecList_
     series = {WWW '22 Companion}
 }
 ```
+
+_Challenge Review_
+
+```
+@misc{Tagliabue2023,
+  doi = {10.1038/s42256-022-00606-0},
+  url = {https://doi.org/10.1038/s42256-022-00606-0},
+  author = {Tagliabue, Jacopo and Bianchi, Federico and Schnabel, Tobias and Attanasio, Giuseppe and Greco, Ciro and Moreira, Gabriel de Souza P. and Chia, Patrick John},
+  title = {A challenge for rounded evaluation of recommender systems},
+  publisher = {Nature Machine Intelligence},
+  year = {2023}
+}
+
 
 _EvalRS_
 
