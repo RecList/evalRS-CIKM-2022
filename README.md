@@ -28,7 +28,7 @@ If you like our work and wish to support open source RecSys projects, please tak
 
 * 📖 [RecList website](https://reclist.io/)
 * 📖 [Running EvalRS evaluation on your model](https://github.com/RecList/evalRS-CIKM-2022/blob/main/README_CIKM_2022.md)
-* 📖 [Our Challenge Review for Nature Machine Intelligence](https://www.nature.com/articles/s42256-022-00606-0)
+* 📖 [Our Challenge review for Nature Machine Intelligence](https://www.nature.com/articles/s42256-022-00606-0)
 * 🛖 [EvalRS YouTube Playlist (Keynotes)](https://www.youtube.com/playlist?list=PLvvTyLx3m9oRW3K1OUka0LJWJEqR1tysD)
 
 ## Organizers
@@ -80,7 +80,7 @@ _Challenge Review_
   publisher = {Nature Machine Intelligence},
   year = {2023}
 }
-
+```
 
 _EvalRS_
 
